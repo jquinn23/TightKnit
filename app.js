@@ -84,7 +84,53 @@ app.post("/newpfp", urlparser, (req, res) => {
     })
 })
 
+//Posts Add/Delete
+//Add Post
+app.get('/addpost', (req, res) => {
+    let post = { UserID: '2', PostID: '2', PostContent: 'This is a test. Would you not agree?' };
+    let sql = 'INSERT INTO posts SET ?';
+    let query = con.query(sql, post, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        res.send('Post added...');
+    });
+});
+//Add Comment
+app.get('/addcomment', (req, res) => {
+    let post = { UserID: '1', PostID: '2', CommentContent: 'This is a test. Would you not agree?' };
+    let sql = 'INSERT INTO comments SET ?';
+    let query = con.query(sql, post, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        res.send('Comment added...');
+    });
+});
+//Get Post
+app.get('/getpost/:id', (req, res) => {
+    con.query('SELECT * FROM posts WHERE PostID = ?', [req.params.id], (err, rows, fields) => {
+        if (!err)
+            res.send(rows);
+        else
+            console.log(err);
+    });
+});
+//Delete Post - Based on PostID
+app.get('/deletepost/:id', (req, res) => {
+    con.query('DELETE FROM posts WHERE PostID = ?', [req.params.id], (err, rows, fields) => {
+        if (!err)
+            res.send('Deleted Post');
+        else
+            console.log(err);
 
+    });
+    con.query('DELETE FROM comments WHERE PostID = ?', [req.params.id], (err, rows, fields) => {
+        if (!err)
+            res.send('Deleted Comment');
+        else
+            console.log(err);
+    });
+
+});
 
 app.listen(8000, () => {
     console.log('server is up and listening');
