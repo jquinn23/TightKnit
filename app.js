@@ -84,6 +84,7 @@ app.post("/newpfp", urlparser, (req, res) => {
     })
 })
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Posts Add/Delete
 //Add Post
 app.get('/addpost', (req, res) => {
@@ -131,7 +132,28 @@ app.get('/deletepost/:id', (req, res) => {
     });
 
 });
-
+//Make a Group Manually
+app.get('/makegroup', (req, res) => {
+    let group = { GroupID: '3', GroupCategory: 'Porn', NumberOfPeopleInGroup: '10' };
+    let sql = 'INSERT INTO groupp SET ?';
+    let query = con.query(sql, group, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        res.send('Group added...');
+    });
+});
+//Change Group Based On Users ID and Current Group ID. Puts user in first 'open' group
+app.get('/changegroup/:id', (req, res) => {
+    var someVar = [];
+    let query = con.query('Update accounts set group_id = (SELECT groupid FROM groupp WHERE GroupID <> group_id  limit 1) Where userid = ?;', [req.params.id], (err, result) => {
+        if (err) throw err;
+        someVar = result;
+        console.log(someVar[0]);
+        //console.log(result[0]);
+        res.send('Group added...');
+    });
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 app.listen(8000, () => {
     console.log('server is up and listening');
 });
