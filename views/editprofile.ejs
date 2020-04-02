@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <img src="<%= pfp %>" height="200" width="200"/>
+    <form action="newpfp" method="post">
+        <label for="img">Select image:</label>
+        <input type="file" id="img" name="img" accept="image/*"><br>
+        <input type="submit"></input>
+
+    </form>
+
+    <form action="/updateProfile" method="post">
+        <label for="fName">First Name:</label>
+        <input type="text" name="fName" required value="<%= firstName %>"">
+        <label for="lName">Last Name:</label>
+        <input type="text" name="lName" value="<%= lastName %>" required>
+        <label for="email">Email:</label>
+        <input type="email" name="email" value="<%= email %>" required>
+        <label for="bio">Bio:</label>
+        <textarea name="bio" required><%= bio %></textarea>
+        <input type="submit" value="Save Changes">
+</ul>
+<a href="/profile">Cancel</a>
+
+
+</body>
+</html>
