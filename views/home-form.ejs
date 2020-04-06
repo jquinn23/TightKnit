@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  
+<!-- Header Container -->
+<%- include ('partials/header') -%>
+
+<body>
+ 
+    
+<!--Display Posts & Format-->
+
+<!------ Include the above in your HEAD tag ---------->
+<div class="container">
+  <input type="button" class="btn btn-primary btn-lg btn-block" onclick="location.href='/createpost';" value="Create a Post"/>
+</div>
+<br/>
+<br/>
+<div class="container">
+<div class="tab-content">
+<div class="tab-pane active" id="comments-logout">                
+    <ul class="media-list">
+      <li class="media">
+        <a class="pull-left" href="#"> <img class="media-object img-circle" src="https://s3.amazonaws.com/uifaces/faces/twitter/dancounsell/128.jpg" alt="profile"></a>
+          <div class="media-body">
+           <div class="well well-lg">
+              <ul class="media-date text-uppercase reviews list-inline">
+                <h4 class="media-heading text-uppercase reviews">USER NAME </h4>
+                <l1>TIME</li>
+                <p class="media-comment"> COMMENT FIELD </p>
+              </ul>
+              <a class="btn btn-warning btn-circle text-uppercase"  href="/comment"><span class="glyphicon glyphicon-comment"></span> Comments</a>
+             <!-- <a class="btn btn-warning btn-circle text-uppercase"  href="/createpost"><span class="glyphicon glyphicon-comment"></span> Comments</a>-->
+          </div>              
+            </div>
+    </ul>
+</div>    
+</div>    
+</div>
+
+</body>
+</html>
