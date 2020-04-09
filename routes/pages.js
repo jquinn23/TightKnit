@@ -36,15 +36,148 @@ router.post('/login', (req, res, next)=> {
             req.session.user = result;
             req.session.opp = 1;
 
-            req.flash('Logged in as :'+result.username);
-            res.redirect('/home');
-
+            if(req.session.user.GroupID == null)
+            {
+                res.redirect('/regroup');
+            }
+            else{
+                req.flash('Logged in as :'+result.username);
+                res.redirect('/home');
+            }
             
         } else {
             req.flash('Username/Password is incorrect!');
             res.redirect('/');
         }
     })
+});
+
+// Joins the user to a different group
+router.get('/regroup', (req, res, next) => {
+
+    //If there is no user redirect them
+    if(req.session.user == null) {
+        res.redirect('/');
+    }
+    //If they have a group, redirect them
+    else if(req.session.user.GroupID != null){
+        res.redirect('/');
+    }
+    //Otherwise, render the group page
+    else {
+        res.render('add_group');
+    }
+    
+});
+
+//Attempting to join a group in a category
+router.post('/regroup', (req, res, next) => {
+     //If there is no user redirect them
+     if(req.session.user == null) {
+        res.redirect('/');
+    }
+    //If they have a group, redirect them
+    else if(req.session.user.GroupID != null || req.session.user.UserID == null){
+        res.redirect('/');
+    }
+    
+    
+    //Yes, there are several better ways to do this, but I'm in a rush.
+    //Make sure the submission matches a legitimate category
+    let Category = JSON.stringify(req.body.group);
+    Category = Category.substring(1, Category.length - 1)
+
+    if(Category.valueOf() === "Xbox" || Category.valueOf() === "Nintendo" || Category.valueOf() === "Playstation" ||
+    Category.valueOf() === "PC Gaming" || Category.valueOf() === "Reading" || Category.valueOf() === "Movies" 
+    || Category.valueOf() === "Chemistry" || Category.valueOf() === "Motorsports" || Category.valueOf() === "Golf" 
+    || Category.valueOf() === "Golf" || Category.valueOf() === "Football" || Category.valueOf() === "Soccer" 
+    || Category.valueOf() === "Baseball" || Category.valueOf() === "Cooking" || Category.valueOf() === "Camping"
+    || Category.valueOf() === "Fitness" || Category.valueOf() === "Uncategorized")
+    {
+        let GroupType = req.body.group;
+        let UserID = req.session.user.UserID
+
+        //Find if there are already any groups of this category
+        let sql = "SELECT * from Groupp WHERE GroupCategory = ? AND NumberOfPeopleInGroup < 10";
+        let data = [GroupType];
+
+
+        con.query(sql, data, (err, result) => {
+                if(err) throw err;
+                //If there is no such group, create one
+                if(result.length == 0)
+                {
+                    sql = "INSERT INTO Groupp (GroupCategory, NumberOfPeopleInGroup) VALUES (?,?)"
+                    let data = [GroupType, 1];
+
+                    con.query(sql, data, (err, result) => {
+                        if(err) throw err;
+
+                        //Now, get the new GroupID
+                        result = null;
+                        sql = "SELECT GroupID from Groupp WHERE GroupCategory = ? AND NumberOfPeopleInGroup < 10";
+                        data = [GroupType];
+                        con.query(sql, data, (err, result)=>
+                        {
+                            if(err) throw err;
+                            
+                            //If we can't find the group now, we really blew it
+                            if(result.length == 0) throw "Something has gone very wrong";
+                            
+
+                            //Doesn't work without it. Reasons unknown
+                            result = JSON.stringify(result[0]);
+                            result = JSON.parse(result);
+
+                            let new_group_id = result.GroupID;
+                            
+
+                            //Now, put the user in the new group
+                            sql = "UPDATE accounts SET GroupID = ? WHERE UserID = ?";
+                            data = [new_group_id, UserID];
+                            con.query(sql, data, (err, result)=>
+                            {
+                                if(err) throw err;
+
+                                //Send them to their new group
+                                res.redirect('/home');
+                            })
+                        })
+                    })
+                }
+                //Add them to one of the groups
+                else
+                {
+                    //Pick out a random group from among the available ones
+                    NewGroup = Math.floor(Math.random() * result.length);
+                    
+                    //Doesn't work without it. Reasons unknown
+                    result = JSON.stringify(result[NewGroup]);
+                    result = JSON.parse(result);
+
+                    NewGroupID = result['GroupID'];
+                    sql = "UPDATE accounts SET GroupID = ? WHERE UserID = ?";
+                    data = [NewGroupID, UserID];
+                    
+                    con.query(sql, data, (err, result) =>
+                    {
+                        if(err) throw err;
+                        sql = "UPDATE Groupp SET NumberOfPeopleInGroup = NumberOfPeopleInGroup + 1 WHERE GroupId = ?";
+                        data = [NewGroupID];
+                        con.query(sql, data, (err, result) => {
+                            if(err) throw err;
+
+                            //This means we have successfully been added to the group
+                            res.redirect('/home');
+                        })
+                    })
+                }
+            })
+        }
+    else{
+        console.log(`Error: ${req.body.group} is not a valid category`);
+        res.redirect('/');
+    }
 });
 
 // Log Out Button
@@ -58,7 +191,6 @@ router.get('/logout', (req, res, next) => {
 
 //Registration
 router.post("/register", (req, res) => {
-    console.log(req.body);
     var first_name = req.body.register_first_name;
     var last_name = req.body.register_last_name;
     //Username is actually email. Long story.
@@ -76,13 +208,10 @@ router.post("/register", (req, res) => {
     let sql = "SELECT * from accounts WHERE Email = ?";
     let data = [email];
 
-    //using a flag to not put a connection within a connection
-    let proceed_flag = false;
 
     con.query(sql, data, (err, result) => {
         if(err) throw err;
 
-        //If the email has been used before, don't proceed
         if(result.length > 0)
         {
             req.flash("Email has already been used");

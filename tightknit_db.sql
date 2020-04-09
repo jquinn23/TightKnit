@@ -6,7 +6,7 @@ use tightknit;
     
     
 create table Groupp (
-	GroupID int NOT NULL,
+	GroupID int NOT NULL AUTO_INCREMENT,
     PRIMARY KEY(GroupID),
     GroupCategory char(20),
     NumberOfPeopleInGroup int
