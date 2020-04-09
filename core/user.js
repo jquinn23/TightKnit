@@ -19,7 +19,18 @@ User.prototype = {
             callback(result);
         });
     },
+    findPostID : function(user = null, callback)
+    {
 
+        if(user) {
+            var field = 'UserID';
+        }
+        let sql = `SELECT * FROM posts WHERE ${field}  = ?`;
+        pool.query(sql, user, function(err, result) {
+            if(err) console.log("fffffgggg")
+            callback(result);
+        });
+    },
 
     login : function(username, password, callback)
     {

@@ -9,16 +9,15 @@ const flash = require('req-flash');
 app.use(express.urlencoded({extended: false}));
 
 // Serve Static Files
-
-
+//run css
+const homePath =path.join(__dirname, 'public')
+app.use(express.static(homePath))
 //Templeate Engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 //cookies
 app.use(cookieParser());
-
-
 
 //Session
 app.use(session({
@@ -47,7 +46,6 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500);
     res.send(err.message);
 });
-
 // Setting the server
 app.listen(8000, () =>{
 console.log('Server is running on port 8000...');

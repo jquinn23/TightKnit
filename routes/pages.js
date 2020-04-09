@@ -6,7 +6,109 @@ const hash = require('bcrypt');
 
 
 const user = new User();
+//groupPost
+router.get('/group',(req,res)=>{
+    if(req.session && req.session.user){
+        //console.log(req.session.user)
+        user.find(req.session.user.Email,(result)=>{
+            if(result){
+                res.render('home-form')
+                return;
+            }
+            res.redirect('/');
+        })
+    }else
+    {
+        res.redirect('/');
+    }
+    
+})
+// comment
+router.get('/comment',(req,res)=>{
+    console.log('in comment')
+    if(req.session && req.session.user){
+        console.log(req.session.user)
+        user.find(req.session.user.Email,(result)=>{
+            if(result){
+                res.render('partials/comment-form');
+                return;
+            }
+            res.redirect('/');
+        })
+    }else
+    {
+        res.redirect('/');
+    }
+});
+router.post('/submitcomment',(req,res)=>{
+    console.log('in submit comment')
+    if(req.session.user){
+        //console.log(req.session.user.UserID)
+        user.findPostID(req.session.user.UserID,(result)=>{
+            result = JSON.stringify(result[0]);
+            result= JSON.parse(result);
+            //data
+            UserID = req.session.user.UserID
+            PostID = result.PostID
+            CommentContent = req.body.addComment
+            TimeOfComment = new Date()
+             //Insert the user into the database
+            sql = "INSERT INTO comments (UserID, PostID, CommentContent, TimeOfComment) VALUES (?, ?, ?, ?)";
+            data = [UserID, PostID, CommentContent, TimeOfComment];
 
+            con.query(sql, data, (err, result) => {
+                if(err) throw err;
+
+                //REGISTRATION SUCCESSFUL
+                res.redirect("/group");
+            })
+        })
+    }else{
+        res.redirect('/')
+    }
+
+})
+router.get('/createpost',(req,res)=>{
+    console.log('in post')
+    if(req.session && req.session.user){
+        //console.log(req.session.user)
+        user.find(req.session.user.Email,(result)=>{
+            if(result){
+                res.render('partials/post-form')
+                return;
+            }
+            res.redirect('/');
+        })
+    }else
+    {
+        res.redirect('/');
+    }
+})
+//get create Post
+router.post('/submitpost',(req,res)=>{
+    console.log("in submit post")
+    if(req.session.user.UserID){
+        var UserID = req.session.user.UserID
+        var PostContent = req.body.addComment
+        var TimeOfComment= new Date()
+       // console.log(UserID+" "+PostContent+"time:"+TimeOfComment)
+        //Insert the user into the database
+        sql = "INSERT INTO posts (UserID, PostContent, TimeOffPost) VALUES ( ?, ?, ?)";
+        data = [UserID, PostContent,TimeOfComment];
+    
+         con.query(sql, data, (err, result) => {
+             if(err) throw err;
+    
+             //SUccess
+             console.log("success")
+             res.redirect("/group");
+         })
+    }else{
+        res.redirect("/");
+    }
+
+    
+})
 // Index Page
 router.get('/', function(req, res){
     let user = req.session.user;
@@ -32,7 +134,7 @@ router.get('/home', (req, res, next)=>{
 router.post('/login', (req, res, next)=> {
     user.login(req.body.username, req.body.password, function(result){
         if(result) {
-
+           // console.log("result",result)
             req.session.user = result;
             req.session.opp = 1;
 
@@ -42,8 +144,9 @@ router.post('/login', (req, res, next)=> {
             }
             else{
                 req.flash('Logged in as :'+result.username);
-                res.redirect('/home');
+                res.redirect('/group');
             }
+
             
         } else {
             req.flash('Username/Password is incorrect!');
