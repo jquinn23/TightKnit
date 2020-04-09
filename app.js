@@ -154,6 +154,33 @@ app.get('/changegroup/:id', (req, res) => {
     });
 });
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+router.get('/changegroup', (req, res) => {
+    //console.log(req.session.user.UserID);
+    //console.log(req.session.user.GroupID);
+    var someVar = [];
+    let id = req.session.user.UserID;
+    //let sql = 'Update accounts set GroupID = (SELECT groupp.GroupID FROM groupp WHERE GroupID <> groupp.GroupID  limit 1) Where UserID = id';
+    con.query('Update accounts set accounts.GroupID = (SELECT GroupID FROM groupp WHERE groupp.GroupID <> accounts.GroupID  limit 1) Where userid = ?', id, (err, result) => {
+        if (err) throw err;
+
+    });
+});
+//Delete Post with comments
+router.post('/deletepost', (req, res) => {
+    let id = req.session.user.UserID;
+    let eventID = 23;
+    con.query('DELETE FROM posts where UserID = ? and PostID = ?', [id, eventID], (err, rows, fields) => {
+        if (err) throw err;
+
+    });
+    con.query('DELETE FROM comments where PostID = ?', eventID, (err, rows, fields) => {
+        if (err) throw err;
+        console.log("Post Deleted");
+    });
+});
+
+
 app.listen(8000, () => {
     console.log('server is up and listening');
 });
