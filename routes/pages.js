@@ -11,6 +11,7 @@ const user = new User();
 router.get('/', function(req, res){
     let user = req.session.user;
     if (user) {
+        console.log(req.session.user)
         res.redirect('/home');
         return;
     }
@@ -106,7 +107,87 @@ router.post("/register", (req, res) => {
     })    
 })
 
+//profile
+router.get("/profile", (req, res) => {
+    con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+        if(err) throw err;
+        res.render('profile', {firstName : result[0].FirstName, lastName : result[0].LastName,
+         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
+    })
+    })
+
+//edit profile page
+router.get("/editprofile", (req, res) => {
+    con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+        if(err) throw err;
+        res.render('editprofile', {firstName : result[0].FirstName, lastName : result[0].LastName,
+            email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
+    })
+})
+
+//update profile
+router.post("/updateprofile", (req, res) => {
+
+    /*prepared sql statement
+    gets data from parser and saves it for sql statement in variable data
+    executes prepared sql statement*/
+    let sql = `update accounts set FirstName = ?, LastName=?, Email=?, Bio=? where UserID=${req.session.user.UserID};`
+    let data = [req.body.fName, req.body.lName, req.body.email, req.body.bio]
+    con.query(sql, data, (err,result) => {
+        if(err) throw err;
+        res.redirect('/profile');
+    })
+})
 
 
+//settings
+router.get("/settings", (req, res) => {
+        res.render('settings')
+    })
+
+//account deleted
+router.get("/deletedaccount", (req, res) => {
+    con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+        if(err) throw err;
+        res.render('index');
+    })
+})
+
+//admin page
+router.get("/adminpage", (req, res) => {
+    res.render('adminpage')
+    })
+
+
+//stuff for profile pictures
+const multer = require('multer')
+router.use(express.static('./public'))
+const path = require('path')
+
+const storage = multer.diskStorage({
+    //renames the images and stores them in the public folder
+    destination: './public',
+    filename: function(req, file, cb){
+        cb(null,file.fieldname + '-' + Date.now()+ path.extname(file.originalname))
+    }
+})
+const upload = multer({
+    storage: storage
+}).single('img');
+
+//new pfp
+router.post("/newpfp", (req, res) => {
+    upload(req, res, (err)=>{
+        //sql to change the pfp
+        let sql = `update accounts set ProfilePicture = ? where UserID=${req.session.user.UserID};`
+        let data = [req.file.filename]
+        con.query(sql, data, (err,result) => {
+        if(err) throw err;
+
+        //redirects to profile page
+        res.redirect('/profile');
+    })
+    })
+    })
 
 module.exports = router;

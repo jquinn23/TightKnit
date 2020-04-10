@@ -1,17 +1,52 @@
 <!DOCTYPE html>
 <html>
-<head>
-</head>
-<body>
-    <img src="<%= pfp %>" height="200" width="200"/>
-<ul>
-  <li>First Name: <%= firstName %></li>
-  <li>Last Name: <%= lastName %></li>
-  <li>Email: <%= email %></li>
-  <li>Bio: <%= bio %></li>
-</ul>
+  <head>
+    <!-- Bootstrap CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-sm navbar-light" style="background-color: #ccffcc;">
+      <ul class="navbar-nav">
+        <li class="nav-item" style="padding-left: 20px; padding-right: 20px;">
+          <a class="nav-link" href="/home">Home</a>
+        </li>
+        <li class="nav-item" style="padding-left: 20px; padding-right: 20px;">
+          <a class="nav-link" href="/group">Group</a>
+        </li>
+        <li class="nav-item" style="padding-left: 20px; padding-right: 20px;">
+          <a class="nav-link" href="/profile">Profile</a>
+        </li>
+        <li class="nav-item" style="padding-left: 20px; padding-right: 20px;">
+          <a class="nav-link" href="/settings">Settings</a>
+        </li>
+      </ul>
+    </nav>
 
-<a href="/editprofile">Edit Profile</a>
+    <div class="container-fluid">
 
+      <div style="padding-top: 30px;" class="row">
+        <div class="col-md-6 text-center">
+          <img style="padding-bottom: 10px;" src="<%= pfp %>" height="275" width="275"/>
+          <h4><%= firstName %> <%= lastName %></h4>
+        </div>
+      
+        <div style="padding-top: 30px;" class="col-md-6 text-center">
+          <h3>First Name:</h3>
+          <p><%= firstName %></p>
+          <h3>Last Name:</h3>
+          <p><%= lastName %></p>
+          <h3>Email: <%= email %></h3>
+          <p><%= email %></p>
+          <h3>Bio:</h3>
+          <p><%= bio %></p>
+          <a href="/editprofile" class="btn" style="background-color: rgb(80, 80, 80); color: white;">Edit Profile</a>
+        </div>
+
+      </div>
+
+    </div>
+
+  
 </body>
 </html>
