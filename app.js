@@ -1,187 +1,52 @@
-//import mysql
-const mysql = require('mysql');
-
-const fs = require('fs');
-
-//import express library
 const express = require('express');
+const session = require('express-session');
+const path = require('path');
+const pageRouter = require('./routes/pages');
 const app = express();
+const cookieParser = require('cookie-parser');
+const flash = require('req-flash');
+
+app.use(express.urlencoded({extended: false}));
+
+// Serve Static Files
+//run css
+const homePath =path.join(__dirname, 'public')
+app.use(express.static(homePath))
+//Templeate Engine
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-//allows for images to be used (could not get local images to load without it)
-app.use(express.static('images'));
+//cookies
+app.use(cookieParser());
 
-//import body parser
-const bodyParser = require('body-parser');
-var urlparser = bodyParser.urlencoded({extended : false})
+//Session
+app.use(session({
+    secret: '1234',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 60 * 1000 * 30
+    }
+}));
 
-//create database connection
-var con = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'tightknit'
-})
+//flash
+app.use(flash());
 
-//connection test for database (throws err if connection fails)
-con.connect(function(err){
-    if(err) throw err;
-    console.log('connected to database');
+// Routers
+app.use('/', pageRouter);
+
+// Error Catch
+app.use((req, res, next) =>{
+    var err = new Error("Page not found");
+    err.status = 404;
+    next(err);
 });
 
-//query to database for user information and renders the profile page
-app.get("/profile", (req, res) => {
-    con.query('select * from accounts where UserID=1', (err,result) => {
-        if(err) throw err;
-        console.log(result)
-        res.render('profile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
-    })
-    })
-
-//edit profile action
-app.get("/editprofile", (req, res) => {
-    con.query('select * from accounts where UserID=1', (err,result) => {
-        if(err) throw err;
-        res.render('editprofile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-            email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
-    })
-})
-
-//update profile (urlparser saves the post data)
-app.post("/updateprofile", urlparser, (req, res) => {
-
-    /*prepared sql statement
-    gets data from parser and saves it for sql statement in variable data
-    executes prepared sql statement*/
-    let sql = 'update accounts set FirstName = ?, LastName=?, Email=?, Bio=? where UserID=1;'
-    let data = [req.body.fName, req.body.lName, req.body.email, req.body.bio]
-    con.query(sql, data, (err,result) => {
-        if(err) throw err;
-    })
-    
-    con.query('select * from accounts where UserID=1', (err,result) => {
-        if(err) throw err;
-        res.render('profile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-            email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture});
-    })
-})
-
-//new profile picture
-app.post("/newpfp", urlparser, (req, res) => {
-        console.log(req.body.img)
-        
-        let sql = 'update accounts set ProfilePicture = ? where UserID=1;'
-        let data = [req.body.img]
-        con.query(sql, data, (err,result) => {
-        if(err) throw err;
-    })
-
-        con.query('select * from accounts where UserID=1', (err,result) => {
-            if(err) throw err;
-            res.render('editprofile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-                email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
-    })
-})
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Posts Add/Delete
-//Add Post
-app.get('/addpost', (req, res) => {
-    let post = { UserID: '2', PostID: '2', PostContent: 'This is a test. Would you not agree?' };
-    let sql = 'INSERT INTO posts SET ?';
-    let query = con.query(sql, post, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-        res.send('Post added...');
-    });
+app.use((err, req, res, next) => {
+    res.status(err.status || 500);
+    res.send(err.message);
 });
-//Add Comment
-app.get('/addcomment', (req, res) => {
-    let post = { UserID: '1', PostID: '2', CommentContent: 'This is a test. Would you not agree?' };
-    let sql = 'INSERT INTO comments SET ?';
-    let query = con.query(sql, post, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-        res.send('Comment added...');
-    });
+// Setting the server
+app.listen(8000, () =>{
+console.log('Server is running on port 8000...');
 });
-//Get Post
-app.get('/getpost/:id', (req, res) => {
-    con.query('SELECT * FROM posts WHERE PostID = ?', [req.params.id], (err, rows, fields) => {
-        if (!err)
-            res.send(rows);
-        else
-            console.log(err);
-    });
-});
-//Delete Post - Based on PostID
-app.get('/deletepost/:id', (req, res) => {
-    con.query('DELETE FROM posts WHERE PostID = ?', [req.params.id], (err, rows, fields) => {
-        if (!err)
-            res.send('Deleted Post');
-        else
-            console.log(err);
-
-    });
-    con.query('DELETE FROM comments WHERE PostID = ?', [req.params.id], (err, rows, fields) => {
-        if (!err)
-            res.send('Deleted Comment');
-        else
-            console.log(err);
-    });
-
-});
-//Make a Group Manually
-app.get('/makegroup', (req, res) => {
-    let group = { GroupID: '3', GroupCategory: 'Porn', NumberOfPeopleInGroup: '10' };
-    let sql = 'INSERT INTO groupp SET ?';
-    let query = con.query(sql, group, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-        res.send('Group added...');
-    });
-});
-//Change Group Based On Users ID and Current Group ID. Puts user in first 'open' group
-app.get('/changegroup/:id', (req, res) => {
-    var someVar = [];
-    let query = con.query('Update accounts set group_id = (SELECT groupid FROM groupp WHERE GroupID <> group_id  limit 1) Where userid = ?;', [req.params.id], (err, result) => {
-        if (err) throw err;
-        someVar = result;
-        console.log(someVar[0]);
-        //console.log(result[0]);
-        res.send('Group added...');
-    });
-});
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-router.get('/changegroup', (req, res) => {
-    //console.log(req.session.user.UserID);
-    //console.log(req.session.user.GroupID);
-    var someVar = [];
-    let id = req.session.user.UserID;
-    //let sql = 'Update accounts set GroupID = (SELECT groupp.GroupID FROM groupp WHERE GroupID <> groupp.GroupID  limit 1) Where UserID = id';
-    con.query('Update accounts set accounts.GroupID = (SELECT GroupID FROM groupp WHERE groupp.GroupID <> accounts.GroupID  limit 1) Where userid = ?', id, (err, result) => {
-        if (err) throw err;
-
-    });
-});
-//Delete Post with comments
-router.post('/deletepost', (req, res) => {
-    let id = req.session.user.UserID;
-    let eventID = 23;
-    con.query('DELETE FROM posts where UserID = ? and PostID = ?', [id, eventID], (err, rows, fields) => {
-        if (err) throw err;
-
-    });
-    con.query('DELETE FROM comments where PostID = ?', eventID, (err, rows, fields) => {
-        if (err) throw err;
-        console.log("Post Deleted");
-    });
-});
-
-
-app.listen(8000, () => {
-    console.log('server is up and listening');
-});
-
