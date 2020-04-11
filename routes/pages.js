@@ -6,113 +6,84 @@ const hash = require('bcrypt');
 
 
 const user = new User();
-//groupPost
-router.get('/group',(req,res)=>{
 
-    sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
-
-    con.query(sql, (err, result)=>
-    {
-        if(err) throw err;
-        console.log(result)
-
-        sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${result[0].GroupID} and UserID <> ${req.session.user.UserID}`;
-        con.query(sql, (err, result2)=>{
-            console.log(result2)
-
-            res.render('group', {users: result2, numMembers: result2.length, pic: result2[0].ProfilePicture})
-
-        })
-    
-})
-})
-
-// comment
-router.get('/comment',(req,res)=>{
-    console.log('in comment')
+router.get('/GroupPost',(req,res)=>{
+    console.log("inside GroupPost")
     if(req.session && req.session.user){
-        console.log(req.session.user)
-        user.find(req.session.user.Email,(result)=>{
-            if(result){
-                res.render('partials/comment-form');
-                return;
-            }
-            res.redirect('/');
+        user.getPosts((result)=>{
+            //console.log(result)
+            result.reverse()
+            res.render('home-form',{posts:result})
         })
     }else
     {
         res.redirect('/');
     }
-});
-router.post('/submitcomment',(req,res)=>{
-    console.log('in submit comment')
-    if(req.session.user){
-        //console.log(req.session.user.UserID)
-        user.findPostID(req.session.user.UserID,(result)=>{
-            result = JSON.stringify(result[0]);
-            result= JSON.parse(result);
-            //data
-            UserID = req.session.user.UserID
-            PostID = result.PostID
-            CommentContent = req.body.addComment
-            TimeOfComment = new Date()
-             //Insert the user into the database
-            sql = "INSERT INTO comments (UserID, PostID, CommentContent, TimeOfComment) VALUES (?, ?, ?, ?)";
-            data = [UserID, PostID, CommentContent, TimeOfComment];
-
-            con.query(sql, data, (err, result) => {
-                if(err) throw err;
-
-                //REGISTRATION SUCCESSFUL
-                res.redirect("/home");
-            })
-        })
-    }else{
-        res.redirect('/')
-    }
-
+    console.log("End GroupPost")
 })
+// go table comment
+router.get('/comment',(req,res)=>{
+    res.send("Still work")
+    // console.log('in comment')
+    // if(req.session && req.session.user){
+    //     console.log(req.body)
+    //     user.find(req.session.user.Email,(result)=>{
+    //         if(result){
+    //             res.render('partials/comment-form');
+    //             return;
+    //         }
+    //         res.redirect('/');
+    //     })
+    // }else
+    // {
+    //     res.redirect('/');
+    // }
+});
+
+//get create Post
 router.get('/createpost',(req,res)=>{
-    console.log('in post')
+    console.log('in table create post')
     if(req.session && req.session.user){
         //console.log(req.session.user)
         user.find(req.session.user.Email,(result)=>{
             if(result){
-                res.render('home')
+                res.render('partials/post-form')
                 return;
             }
-            res.redirect('/');
+            res.redirect('/GroupPost');
         })
     }else
     {
         res.redirect('/');
     }
+    console.log("End table create post")
 })
-//get create Post
 router.post('/submitpost',(req,res)=>{
     console.log("in submit post")
     if(req.session.user.UserID){
         var UserID = req.session.user.UserID
         var PostContent = req.body.addComment
         var TimeOfComment= new Date()
+        var FullName = req.session.user.FirstName +' '+ req.session.user.LastName
        // console.log(UserID+" "+PostContent+"time:"+TimeOfComment)
         //Insert the user into the database
-        sql = "INSERT INTO posts (UserID, PostContent, TimeOffPost) VALUES ( ?, ?, ?)";
-        data = [UserID, PostContent,TimeOfComment];
+        sql = "INSERT INTO posts (UserID, PostContent, FullName, TimeOffPost) VALUES ( ?, ?, ?, ?)";
+        data = [UserID, PostContent, FullName,TimeOfComment];
     
          con.query(sql, data, (err, result) => {
              if(err) throw err;
     
              //SUccess
-             console.log("success")
-             res.redirect("/home");
+             
+             res.redirect("/GroupPost");
          })
     }else{
         res.redirect("/");
     }
 
-    
+    console.log("end submit Post")
 })
+
 // Index Page
 router.get('/', function(req, res){
     let user = req.session.user;
