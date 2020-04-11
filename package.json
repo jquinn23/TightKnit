@@ -22,6 +22,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app"
   },
+  "engines": {
+    "node": "10.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC"
