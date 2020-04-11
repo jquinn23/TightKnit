@@ -385,6 +385,35 @@ router.get("/deletedaccount", (req, res) => {
     })
 })
 
+//Change/Leave Group
+router.get('/changegroup', (req, res) => {
+    let id = req.session.user.UserID;
+    con.query('UPDATE groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = (SELECT GroupID FROM accounts WHERE UserID = ?)', id, (err, result) => {
+        if (err) throw err;
+        con.query('UPDATE accounts set GroupID = Null WHERE UserID = ?', id, (err, result) => {
+            if (err) throw err;
+            res.redirect("/regroup");          
+        });
+    });
+});
+//Delete Post with comments
+router.get('/deletepost/:eventID', (req, res) => {
+    console.log(req.params.eventID); console.log(req.session.user.UserID);
+    let sql = 'DELETE FROM comments where PostID = ?';
+    let data = [req.params.eventID];
+    con.query(sql, data, (err, result) => {
+        if (err) throw err;
+        sql = 'DELETE FROM posts where PostID = ? and UserID = ?';
+        data = [req.params.eventID, req.session.user.UserID];
+        con.query(sql, data, (err, result) => {
+            if (err) console.log(err);
+            console.log(result);     
+        });
+    }); 
+});
+
+
+
 //admin page
 router.get("/adminpage", (req, res) => {
     res.render('adminpage')
