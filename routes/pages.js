@@ -8,21 +8,25 @@ const hash = require('bcrypt');
 const user = new User();
 //groupPost
 router.get('/group',(req,res)=>{
-    if(req.session && req.session.user){
-        //console.log(req.session.user)
-        user.find(req.session.user.Email,(result)=>{
-            if(result){
-                res.render('home-form')
-                return;
-            }
-            res.redirect('/');
-        })
-    }else
+
+    sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
+
+    con.query(sql, (err, result)=>
     {
-        res.redirect('/');
-    }
+        if(err) throw err;
+        console.log(result)
+
+        sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${result[0].GroupID} and UserID <> ${req.session.user.UserID}`;
+        con.query(sql, (err, result2)=>{
+            console.log(result2)
+
+            res.render('group', {users: result2, numMembers: result2.length, pic: result2[0].ProfilePicture})
+
+        })
     
 })
+})
+
 // comment
 router.get('/comment',(req,res)=>{
     console.log('in comment')
@@ -60,7 +64,7 @@ router.post('/submitcomment',(req,res)=>{
                 if(err) throw err;
 
                 //REGISTRATION SUCCESSFUL
-                res.redirect("/group");
+                res.redirect("/home");
             })
         })
     }else{
@@ -74,7 +78,7 @@ router.get('/createpost',(req,res)=>{
         //console.log(req.session.user)
         user.find(req.session.user.Email,(result)=>{
             if(result){
-                res.render('partials/post-form')
+                res.render('home')
                 return;
             }
             res.redirect('/');
@@ -101,7 +105,7 @@ router.post('/submitpost',(req,res)=>{
     
              //SUccess
              console.log("success")
-             res.redirect("/group");
+             res.redirect("/home");
          })
     }else{
         res.redirect("/");
@@ -145,7 +149,7 @@ router.post('/login', (req, res, next)=> {
             }
             else{
                 req.flash('Logged in as :'+result.username);
-                res.redirect('/group');
+                res.redirect('/home');
             }
 
             
@@ -341,12 +345,24 @@ router.post("/register", (req, res) => {
 
 //profile
 router.get("/profile", (req, res) => {
+    console.log('profile')
     con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
         if(err) throw err;
         res.render('profile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
+         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture, boo:true} );
     })
     })
+
+//other profile
+router.get("/otherprofile", (req, res) => {
+
+    con.query(`select * from accounts where UserID=2`, (err,result) => {
+        if(err) throw err;
+        res.render('profile.ejs', {firstName : result[0].FirstName, lastName : result[0].LastName,
+         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture, boo: false} );
+    })
+})
+
 
 //edit profile page
 router.get("/editprofile", (req, res) => {
