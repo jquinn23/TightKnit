@@ -6,70 +6,59 @@ const hash = require('bcrypt');
 
 
 const user = new User();
-//groupPost
-router.get('/group',(req,res)=>{
+//*********************************************Nguyen section**************************************************//
+router.post('/do-comment',(req,res)=>{
+    console.log("in do-comment")
+    // PostID =req.body.postID
+    // UserID = req.body.UserID
+    // CommentContent = req.body.comment
+    // TimeOfComment = new Date()
+    // console.log("in do-comment")
+    // sql = "INSERT INTO comments (UserID, PostID,CommentContent, TimeOfComment) VALUES ( ?, ?, ?,?)";
+    // data = [UserID,PostID ,CommentContent,TimeOfComment];
+    // console.log("in do-comment")
+    // con.query(sql, data, (err, result) => {
+    //     if(err) throw err;
+    //          //SUccess
+    //     console.log("success")
+    //     res.redirect('groupnew')
+    //  })
+})
+router.get('/GroupPost',(req,res)=>{
+    console.log("inside GroupPost")
     if(req.session && req.session.user){
-        //console.log(req.session.user)
-        user.find(req.session.user.Email,(result)=>{
-            if(result){
-                res.render('home-form')
-                return;
-            }
-            res.redirect('/');
+        user.getPosts((result)=>{
+            //console.log(result)
+            result.reverse()
+            res.render('home-form',{posts:result})
         })
     }else
     {
         res.redirect('/');
     }
-    
+    console.log("End GroupPost")
 })
-// comment
+// go table comment
 router.get('/comment',(req,res)=>{
-    console.log('in comment')
-    if(req.session && req.session.user){
-        console.log(req.session.user)
-        user.find(req.session.user.Email,(result)=>{
-            if(result){
-                res.render('partials/comment-form');
-                return;
-            }
-            res.redirect('/');
-        })
-    }else
-    {
-        res.redirect('/');
-    }
+    res.send("Still work")
+    // console.log('in comment')
+    // if(req.session && req.session.user){
+    //     console.log(req.body)
+    //     user.find(req.session.user.Email,(result)=>{
+    //         if(result){
+    //             res.render('partials/comment-form');
+    //             return;
+    //         }
+    //         res.redirect('/');
+    //     })
+    // }else
+    // {
+    //     res.redirect('/');
+    // }
 });
-router.post('/submitcomment',(req,res)=>{
-    console.log('in submit comment')
-    if(req.session.user){
-        //console.log(req.session.user.UserID)
-        user.findPostID(req.session.user.UserID,(result)=>{
-            result = JSON.stringify(result[0]);
-            result= JSON.parse(result);
-            //data
-            UserID = req.session.user.UserID
-            PostID = result.PostID
-            CommentContent = req.body.addComment
-            TimeOfComment = new Date()
-             //Insert the user into the database
-            sql = "INSERT INTO comments (UserID, PostID, CommentContent, TimeOfComment) VALUES (?, ?, ?, ?)";
-            data = [UserID, PostID, CommentContent, TimeOfComment];
-
-            con.query(sql, data, (err, result) => {
-                if(err) throw err;
-
-                //REGISTRATION SUCCESSFUL
-                res.redirect("/group");
-            })
-        })
-    }else{
-        res.redirect('/')
-    }
-
-})
+//get create Post
 router.get('/createpost',(req,res)=>{
-    console.log('in post')
+    console.log('in table create post')
     if(req.session && req.session.user){
         //console.log(req.session.user)
         user.find(req.session.user.Email,(result)=>{
@@ -83,32 +72,34 @@ router.get('/createpost',(req,res)=>{
     {
         res.redirect('/');
     }
+    console.log("End table create post")
 })
-//get create Post
 router.post('/submitpost',(req,res)=>{
     console.log("in submit post")
     if(req.session.user.UserID){
         var UserID = req.session.user.UserID
         var PostContent = req.body.addComment
         var TimeOfComment= new Date()
+        var FullName = req.session.user.FirstName +' '+ req.session.user.LastName
        // console.log(UserID+" "+PostContent+"time:"+TimeOfComment)
         //Insert the user into the database
-        sql = "INSERT INTO posts (UserID, PostContent, TimeOffPost) VALUES ( ?, ?, ?)";
-        data = [UserID, PostContent,TimeOfComment];
+        sql = "INSERT INTO posts (UserID, PostContent,FullName, TimeOffPost) VALUES ( ?, ?, ?,?)";
+        data = [UserID, PostContent,FullName,TimeOfComment];
     
          con.query(sql, data, (err, result) => {
              if(err) throw err;
     
              //SUccess
-             console.log("success")
-             res.redirect("/group");
+             
+             res.redirect("/GroupPost");
          })
     }else{
         res.redirect("/");
     }
 
-    
+    console.log("end submit Post")
 })
+//*****************************************************End Nguyen section ************/
 // Index Page
 router.get('/', function(req, res){
     let user = req.session.user;
@@ -132,14 +123,15 @@ router.get('/home', (req, res, next)=>{
 
 // Post Login Data
 router.post('/login', (req, res, next)=> {
+    console.log(req.body.username)
     user.login(req.body.username, req.body.password, function(result){
         if(result) {
-           // console.log("result",result)
+            console.log("result",result)
             req.session.user = result;
             req.session.opp = 1;
 
             req.flash('Logged in as :'+result.username);
-            res.redirect('/group');
+            res.redirect('/GroupPost');
 
             
         } else {

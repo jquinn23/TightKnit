@@ -11,7 +11,7 @@
     <h2 class='text-center'> Create a Post </h2>
     <hr>
     <div class="tab-pane" id="add-comment">
-        <form action="/submitcomment" method="post" class="form-horizontal" id="commentForm" role="form"> 
+        <form  method="POST" class="form-horizontal" id="commentForm" role="form"> 
             
             <div class="form-group">
                 <label for="email" class="col-sm-2 control-label">Comment</label>
@@ -29,6 +29,18 @@
     </div>
   </div>
 </div>
-
+<script>
+    function doComment(form){
+    $.ajax({
+        url:'/do-comment',
+        method:"POST",
+        data:{comment: form.comment.addComment},
+        success: function(response){
+            //alert(response)
+        }
+    });
+    return false
+}
+</script>
 </body>
 </html>

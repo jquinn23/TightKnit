@@ -27,11 +27,16 @@ User.prototype = {
         }
         let sql = `SELECT * FROM posts WHERE ${field}  = ?`;
         pool.query(sql, user, function(err, result) {
-            if(err) console.log("fffffgggg")
+            if(err) console.log("Error")
             callback(result);
         });
     },
-
+    getPosts: (callback)=>{
+        pool.query('SELECT *FROM posts', function(err, result) {
+            if(err) console.log("Error")
+            callback(result);
+        });
+    },
     login : function(username, password, callback)
     {
         //Find the user in the database
