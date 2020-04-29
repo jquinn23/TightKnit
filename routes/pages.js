@@ -30,6 +30,7 @@ router.post('/do-comment',(req,res)=>{
 })
 router.get('/GroupPost/:id',(req,res)=>{
     console.log("inside GroupPost")
+    var UserID = req.session.user;
     if(req.session && req.session.user){
         console.log(req.session.user.GroupID)
         if(req.session.user.GroupID == req.params.id){
@@ -40,7 +41,7 @@ router.get('/GroupPost/:id',(req,res)=>{
                 {
                     console.log("up")
                     result.reverse()
-                    res.render("home-form",{posts:result})
+                    res.render("home-form", { posts: result ,  user: UserID})
                 }
                 else{
                     let sql = 'select*from groupp inner join accounts on groupp.GroupID = accounts.GroupID where groupp.GroupID = ?'
@@ -49,7 +50,7 @@ router.get('/GroupPost/:id',(req,res)=>{
                         console.log("donwn")
                         console.log(results)
                         result.reverse()
-                        res.render("home-form",{posts:results})
+                        res.render("home-form", { posts: result ,  user: UserID})
                 })
             }
                 
