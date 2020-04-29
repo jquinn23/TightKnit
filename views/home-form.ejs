@@ -81,7 +81,7 @@
                                 <a href="/comment/<%=post.PostID%>" class="btn-text">Read all stories &rarr;</a>
                             </div>
                             <div>
-                                <%if (post.UserID == user.UserID || user.AdministratorFlag == 1) { %>
+                                <%if (post.UserID == user.UserID || user.AdministratorFlag != null) { %>
                                     <a href="/deletepost/<%=post.PostID%>" class="btn-text">Delete &rarr;</a>
                                 <% } %>
                             </div>
