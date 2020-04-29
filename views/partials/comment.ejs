@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">
+        <link rel="stylesheet" href="/css/icon-font.css">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="shortcut icon" type="/image/png" href="image/favicon.png">
+        
+        <title>Tightknit |MEET with people of similar interests! |CONNECT with a small community! </title>
+    </head>
+    
+    <body>
+        <div class="navigation">
+            <input type="checkbox" class="navigation__checkbox" id="navi-toggle">
+
+            <label for="navi-toggle" class="navigation__button">
+                <span class="navigation__icon">&nbsp;</span>
+            </label>
+
+            <div class="navigation__background">&nbsp;</div>
+
+            <nav class="navigation__nav">
+                <ul class="navigation__list">
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>01</span>About Natous</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>02</span>Your benfits</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>03</span>Popular tours</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>04</span>Stories</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>05</span>Book now</a></li>
+                    </ul>
+            </nav>
+        </div>
+
+        <header class="header">
+            <div class="header__logo-box">
+                <img src="/image/logo-white.png" alt="Logo" class="header__logo">
+            </div>
+
+            <div class="header__text-box">
+                <h1 class="heading-primary">
+                    <span class="heading-primary--main">Tight-Knit!</span>
+                    <span class="heading-primary--sub">MEET And CONNECT</span>
+                </h1>
+            </div>
+        </header>
+
+        <main>
+            <section class="section-stories">
+                <div class="bg-video">
+                    <video class="bg-video__content" autoplay muted loop>
+                        <source src="/image/video.mp4" type="video/mp4">
+                        <source src="/image/video.webm" type="video/webm">
+                        Your browser is not supported!
+                    </video>
+                </div>
+
+                <div class="u-center-text u-margin-bottom-big">
+                    <h2 class="heading-secondary">
+                        Group <%= posts[0].GroupID %>
+                    </h2>
+                </div>
+
+                <div class="row">
+                    <div class="story">
+                        <figure class="story__shape">
+                            <img src="/image/nat-8.jpg" alt="Person on a tour" class="story__img">
+                            <figcaption class="story__caption"><%=posts[0].FullName%></figcaption>
+                        </figure>
+                        <div class="story__text">
+                            <h3 class="heading-tertiary u-margin-bottom-small"><%=posts[0].TimeOffPost %></h3>
+                            <p>
+                                <%=posts[0].PostContent %>
+                            </p>
+                            <a href="#section-book" class="btn btn--white btn--animated">Comment</a>
+                        </div>
+                    </div>
+                    <% if (posts[0].CommentID) { %>
+
+                    <% posts.forEach((post)=>{ %>
+                    <div class="story_new">
+                        <figure class="story_new__shape">
+                            <img src="/image/nat-8.jpg" alt="Person on a tour" class="story_new__img">
+                            <figcaption class="story_new__caption"></figcaption>
+                        </figure>
+                        <div class="story_new__text">
+                            <h3 class="heading-tertiary u-margin-bottom-small"><%=post.FullName%></h3>
+                            <h2><%=post.TimeOfComment %></h2>
+                            <p>
+                                <%=post.CommentContent %>
+                            </p>
+                        </div>
+                    </div>
+                    <% })%>
+                    <% } %>
+                </div>
+            </section>
+
+            <section class="section-book" id='section-book'>
+                <div class="row">
+                    <div class="book">
+                        <div class="book__form">
+                            <form action="/do-comment" class="form" method="POST" role="form">
+                                <input type='hidden' name="PostID" value="<%= posts[0].PostID %>" />
+                                <div class="u-margin-bottom-medium">
+                                    <h2 class="heading-secondary">
+                                        Comment
+                                    </h2>
+                                </div>
+
+                                <div class="form__group">
+                                    <textarea class="form__input" id="name" name='addComment'  rows='5' required></textarea>
+
+                                </div>
+                                <div class="form__group">
+                                    <button class="btn btn--green">Submit &rarr;</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="footer__logo-box">
+                <img src="" alt="Full logo" class="footer__logo">
+            </div>
+            <div class="row">
+                <div class="col-1-of-2">
+                    <div class="footer__navigation">
+                        <ul class="footer__list">
+                            <li class="footer__item"><a href="#" class="footer__link">Company</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Contact us</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Carrers</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Privacy policy</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Terms</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-1-of-2">
+                    <p class="footer__copyright">
+                        <a href="#" class="footer__link"></a><a href="#" class="footer__link"></a>
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
