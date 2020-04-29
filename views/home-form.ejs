@@ -80,6 +80,11 @@
                             <div>
                                 <a href="/comment/<%=post.PostID%>" class="btn-text">Read all stories &rarr;</a>
                             </div>
+                            <div>
+                                <%if (post.UserID == user.UserID || user.AdministratorFlag == 1) { %>
+                                    <a href="/deletepost/<%=post.PostID%>" class="btn-text">Delete &rarr;</a>
+                                <% } %>
+                            </div>
                         </div>
                     </div>
                 </div>
