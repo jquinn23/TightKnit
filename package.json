@@ -1,7 +1,6 @@
 {
-  "name": "Tight-Knit",
+  "name": "tight-knit",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "dependencies": {
     "bcrypt": "^4.0.1",
@@ -11,9 +10,9 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "hbs": "^4.1.1",
-    "multer": "^1.4.2",
     "jquery": "^3.4.1",
     "jsdom": "^16.2.2",
+    "multer": "^1.4.2",
     "mysql": "^2.18.1",
     "node-pre-gyp": "^0.14.0",
     "nodemon": "^2.0.2",
@@ -31,5 +30,14 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jquinn23/TightKnit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jquinn23/TightKnit/issues"
+  },
+  "homepage": "https://github.com/jquinn23/TightKnit#readme",
+  "description": ""
 }

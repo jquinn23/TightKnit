@@ -6,45 +6,6 @@ const hash = require('bcrypt');
 
 
 const user = new User();
-<<<<<<< HEAD
-
-router.get('/GroupPost',(req,res)=>{
-    console.log("inside GroupPost")
-    if(req.session && req.session.user){
-        user.getPosts((result)=>{
-            //console.log(result)
-            result.reverse()
-            res.render('home-form',{posts:result})
-        })
-    }else
-    {
-        res.redirect('/');
-    }
-    console.log("End GroupPost")
-})
-// go table comment
-router.get('/comment',(req,res)=>{
-    res.send("Still work")
-    // console.log('in comment')
-    // if(req.session && req.session.user){
-    //     console.log(req.body)
-    //     user.find(req.session.user.Email,(result)=>{
-    //         if(result){
-    //             res.render('partials/comment-form');
-    //             return;
-    //         }
-    //         res.redirect('/');
-    //     })
-    // }else
-    // {
-    //     res.redirect('/');
-    // }
-});
-
-//get create Post
-router.get('/createpost',(req,res)=>{
-    console.log('in table create post')
-=======
 //*********************************************Nguyen section**************************************************//
 router.post('/do-comment',(req,res)=>{
     console.log("in post comment")
@@ -70,7 +31,6 @@ router.post('/do-comment',(req,res)=>{
 router.get('/GroupPost/:id',(req,res)=>{
     console.log("inside GroupPost")
     var UserID = req.session.user;
->>>>>>> 08918f9fd58455548f38d2201196694098fb958a
     if(req.session && req.session.user){
         console.log(req.session.user.GroupID)
         if(req.session.user.GroupID == req.params.id){
@@ -93,10 +53,6 @@ router.get('/GroupPost/:id',(req,res)=>{
                         res.render("home-form", { posts: result ,  user: UserID})
                 })
             }
-<<<<<<< HEAD
-            res.redirect('/GroupPost');
-        })
-=======
                 
             })
             console.log("out")
@@ -104,15 +60,10 @@ router.get('/GroupPost/:id',(req,res)=>{
         else{
             res.redirect('/group');
         }
->>>>>>> 08918f9fd58455548f38d2201196694098fb958a
     }else
     {
         res.redirect('/');
     }
-<<<<<<< HEAD
-    console.log("End table create post")
-})
-=======
     console.log("End GroupPost")
 })
 // display comment
@@ -134,7 +85,6 @@ router.get('/comment/:id',(req,res)=>{
     })
     
 });
->>>>>>> 08918f9fd58455548f38d2201196694098fb958a
 router.post('/submitpost',(req,res)=>{
     console.log("in submit post")
     if(req.session && req.session.user.UserID){
@@ -143,42 +93,23 @@ router.post('/submitpost',(req,res)=>{
         var PostContent = req.body.addComment
         var TimeOfComment= new Date()
         var FullName = req.session.user.FirstName +' '+ req.session.user.LastName
-<<<<<<< HEAD
-       // console.log(UserID+" "+PostContent+"time:"+TimeOfComment)
-        //Insert the user into the database
-        sql = "INSERT INTO posts (UserID, PostContent, FullName, TimeOffPost) VALUES ( ?, ?, ?, ?)";
-        data = [UserID, PostContent, FullName,TimeOfComment];
-    
-=======
         sql = "INSERT INTO posts (UserID, PostContent,FullName, TimeOffPost) VALUES ( ?, ?, ?,?)";
         data = [UserID, PostContent,FullName,TimeOfComment];
->>>>>>> 08918f9fd58455548f38d2201196694098fb958a
          con.query(sql, data, (err, result) => {
              if(err) throw err;
     
              //SUccess
              
-<<<<<<< HEAD
-             res.redirect("/GroupPost");
-=======
              res.redirect("/GroupPost/"+GroupID);
->>>>>>> 08918f9fd58455548f38d2201196694098fb958a
          })
     }else{
         res.redirect("/");
     }
 
     console.log("end submit Post")
-<<<<<<< HEAD
 })
 
-=======
-})
-router.get("/group",(req,res)=>{
-    res.send("You dont have on that group")
-})
 //*****************************************************End Nguyen section ************/
->>>>>>> 08918f9fd58455548f38d2201196694098fb958a
 // Index Page
 router.get('/', function(req, res){
     let user = req.session.user;
@@ -210,22 +141,8 @@ router.post('/login', (req, res, next)=> {
             req.session.user = result;
             req.session.opp = 1;
 
-<<<<<<< HEAD
-            if(req.session.user.AdministratorFlag != null){
-                res.redirect('/adminpage')
-            }
-            else if(req.session.user.GroupID == null)
-            {
-                res.redirect('/regroup');
-            }
-            else{
-                req.flash('Logged in as :'+result.username);
-                res.redirect('/home');
-            }
-=======
             req.flash('Logged in as :'+result.username);
             res.redirect('/');
->>>>>>> 08918f9fd58455548f38d2201196694098fb958a
 
             
         } else {
