@@ -114,7 +114,10 @@ router.post('/login', (req, res, next)=> {
             req.session.user = result;
             req.session.opp = 1;
 
-            if(req.session.user.GroupID == null)
+            if(req.session.user.AdministratorFlag != null){
+                res.redirect('/adminpage')
+            }
+            else if(req.session.user.GroupID == null)
             {
                 res.redirect('/regroup');
             }
@@ -316,60 +319,85 @@ router.post("/register", (req, res) => {
 
 //profile
 router.get("/profile", (req, res) => {
-    console.log('profile')
-    con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+    if(req.session && req.session.user){
+        console.log('profile')
+        con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
         if(err) throw err;
-        res.render('profile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture, boo:true} );
+        res.render('profile', {r : result, boo:true} );
     })
+    }else
+    {
+        res.redirect('/');
+    }
     })
 
 //other profile
-router.get("/otherprofile", (req, res) => {
-
-    con.query(`select * from accounts where UserID=2`, (err,result) => {
-        if(err) throw err;
-        res.render('profile.ejs', {firstName : result[0].FirstName, lastName : result[0].LastName,
-         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture, boo: false} );
-    })
+router.get("/user/:userID", (req, res) => {
+    if(req.session && req.session.user){
+        con.query(`select * from accounts where UserID=3`, (err,result) => {
+            if(err) throw err;
+            console.log(result[0])
+            res.render('profile', {r : result,boo:false} );
+        })
+    }else
+    {
+        res.redirect('/');
+    }
 })
 
 
 //edit profile page
 router.get("/editprofile", (req, res) => {
-    con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
-        if(err) throw err;
-        res.render('editprofile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-            email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
-    })
+    if(req.session && req.session.user){
+        con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+            if(err) throw err;
+            res.render('editprofile', {firstName : result[0].FirstName, lastName : result[0].LastName,
+                email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture} );
+        })
+    }else
+    {
+        res.redirect('/');
+    }
 })
 
 //update profile
 router.post("/updateprofile", (req, res) => {
 
-    /*prepared sql statement
-    gets data from parser and saves it for sql statement in variable data
-    executes prepared sql statement*/
-    let sql = `update accounts set FirstName = ?, LastName=?, Email=?, Bio=? where UserID=${req.session.user.UserID};`
-    let data = [req.body.fName, req.body.lName, req.body.email, req.body.bio]
-    con.query(sql, data, (err,result) => {
+    if(req.session && req.session.user){
+        let sql = `update accounts set FirstName = ?, LastName=?, Email=?, Bio=? where UserID=${req.session.user.UserID};`
+        let data = [req.body.fName, req.body.lName, req.body.email, req.body.bio]
+        con.query(sql, data, (err,result) => {
         if(err) throw err;
-        res.redirect('/profile');
-    })
+            res.redirect('/profile');
+        })
+        }else
+        {
+        res.redirect('/');
+        }
 })
 
 
 //settings
 router.get("/settings", (req, res) => {
+    if(req.session && req.session.user){
         res.render('settings')
+    }else
+    {
+        res.redirect('/');
+    }
     })
 
 //account deleted
 router.get("/deletedaccount", (req, res) => {
-    con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
-        if(err) throw err;
-        res.render('index');
-    })
+    if(req.session && req.session.user){
+        con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+            if(err) throw err;
+            res.render('index');
+        })
+    }else
+    {
+        res.redirect('/');
+    }
 })
 
 //Change/Leave Group
@@ -383,6 +411,7 @@ router.get('/changegroup', (req, res) => {
         });
     });
 });
+
 //Delete Post with comments
 router.get('/deletepost/:eventID', (req, res) => {
     console.log(req.params.eventID); console.log(req.session.user.UserID);
@@ -393,18 +422,28 @@ router.get('/deletepost/:eventID', (req, res) => {
         sql = 'DELETE FROM posts where PostID = ? and UserID = ?';
         data = [req.params.eventID, req.session.user.UserID];
         con.query(sql, data, (err, result) => {
-            if (err) console.log(err);
-            console.log(result);     
-        });
-    }); 
-});
+            if (err) console.log(err)
+            console.log(result)
+        })
+    })
+})
 
 
 
 //admin page
 router.get("/adminpage", (req, res) => {
-    res.render('adminpage')
+    if(req.session && req.session.user){
+            sql = `select distinct GroupID, GroupCategory from Groupp where GroupID is not null`;
+            con.query(sql, (err, result)=>{
+            console.log(result)
+            res.render('adminpage', {group: result})
+            })
+    }else
+    {
+        res.redirect('/');
+    }
     })
+
 
 
 //stuff for profile pictures
@@ -425,17 +464,56 @@ const upload = multer({
 
 //new pfp
 router.post("/newpfp", (req, res) => {
-    upload(req, res, (err)=>{
-        //sql to change the pfp
-        let sql = `update accounts set ProfilePicture = ? where UserID=${req.session.user.UserID};`
-        let data = [req.file.filename]
-        con.query(sql, data, (err,result) => {
-        if(err) throw err;
+    if(req.session && req.session.user){
+        upload(req, res, (err)=>{
+            //sql to change the pfp
+            let sql = `update accounts set ProfilePicture = ? where UserID=${req.session.user.UserID};`
+            let data = [req.file.filename]
+            con.query(sql, data, (err,result) => {
+            if(err) throw err;
+    
+            //redirects to profile page
+            res.redirect('/profile');
+        })
+        })
+    }else
+    {
+        res.redirect('/');
+    }
+    })
 
-        //redirects to profile page
-        res.redirect('/profile');
-    })
-    })
-    })
 
+router.get('/group',(req,res)=>{
+    if(req.session && req.session.user){
+        sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
+        con.query(sql, (err, result)=>{
+            if(err) throw err;
+            console.log(result)
+    
+            sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${result[0].GroupID} and UserID <> ${req.session.user.UserID}`;
+            con.query(sql, (err, result2)=>{
+            console.log(result2)
+            res.render('group', {users: result2, numMembers: result2.length})
+    
+            })
+        
+            })}else{
+                res.redirect('/');
+            }
+})
+
+router.get('/admingroup/:groupID',(req,res)=>{
+    if(req.session && req.session.user){ 
+        sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${req.params.groupID} and UserID <> ${req.session.user.UserID}`;
+            con.query(sql, (err, result2)=>{
+            console.log(`users in the group(admin):${result2}`)
+            res.render('group', {users: result2, numMembers: result2.length})
+                
+            })
+                    
+    }else{
+        res.redirect('/');
+    }
+})
+    
 module.exports = router;
