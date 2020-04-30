@@ -31,6 +31,10 @@ User.prototype = {
             callback(result);
         });
     },
+<<<<<<< HEAD
+    getPosts: (callback)=>{
+        pool.query('SELECT *FROM posts', function(err, result) {
+=======
     getPosts: (id = null,callback)=>{
         sql ='select*from groupp inner join (accounts cross join posts) on (groupp.GroupID = accounts.GroupID and posts.UserID = accounts.UserID) where groupp.GroupID = ? '
         pool.query(sql,id, function(err, result) {
@@ -44,6 +48,7 @@ User.prototype = {
         }
         let sql = `SELECT * FROM comments WHERE ${field}  = ?`;
         pool.query(sql,postID, function(err, result) {
+>>>>>>> 08918f9fd58455548f38d2201196694098fb958a
             if(err) console.log("Error")
             callback(result);
         });

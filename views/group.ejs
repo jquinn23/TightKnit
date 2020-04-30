@@ -23,8 +23,25 @@
         </ul>
       </nav>
 
-      <p> Welcome to home page </p>
+      <div class="container-fluid">
 
-<a href="logout">Log Out</a>
+        
+          <div style="padding-top: 30px;">
+      <%if(numMembers > 0) {%>
+      <%for (var i=0; i < numMembers; i++ ) {%>
+        <a href='user/<%=users[i].UserID %>'><img style="padding-bottom: 10px;" src="<%= users[i].ProfilePicture %>" height="120" width="120">
+        <div style="display: inline; padding-left:20px"><%= users[i].FirstName %> <%= users[i].LastName %></div></a>
+
+      </br>
+      </br>
+      <% } %>
+      <% } else{ %>
+        There are no members in your group.
+        <% } %>
+          </div>
+      </div>
+
+
+
 
 </html>

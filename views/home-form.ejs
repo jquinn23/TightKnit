@@ -14,6 +14,54 @@
         <title>Tightknit |MEET with people of similar interests! |CONNECT with a small community! </title>
     </head>
     
+<<<<<<< HEAD
+<!--Display Posts & Format-->
+
+<!------ Include the above in your HEAD tag ---------->
+<div class="container">
+  <input type="button" class="btn btn-primary btn-lg btn-block" onclick="location.href='/createpost';" value="Create a Post"/>
+</div>
+<br/>
+<br/>
+<div class="container">
+<%posts.forEach(function(post){%>
+  <div class="tab-content">
+    <div class="tab-pane active" id="comments-logout">                
+        <ul class="media-list">
+          <li class="media">
+          <a class="pull-left" href="#"> <img class="media-object img-circle" src="https://s3.amazonaws.com/uifaces/faces/twitter/dancounsell/128.jpg" alt="profile"></a>
+            <div class="media-body">
+             <div class="well well-lg">
+                <ul class="media-date text-uppercase reviews list-inline">
+                 <h4 class="media-heading text-uppercase reviews"><%= post.FullName %> </h4>
+                 <l1><%= post.TimeOffPost %></li>
+                 <p class="media-comment"><%= post.PostContent %> </p>
+               </ul>
+                  <a class="btn btn-warning btn-circle text-uppercase"  href="/comment"><span class="glyphicon glyphicon-comment"></span> Comments</a>
+                <!-- <a class="btn btn-warning btn-circle text-uppercase"  href="/createpost"><span class="glyphicon glyphicon-comment"></span> Comments</a>-->
+              </div>              
+           </div>
+        </ul>
+    </div>    
+ </div>   
+<%}) %>
+</div>
+<script>
+  function doComment(form){
+      $.ajax({
+          url:'/do-comment',
+          method:"POST",
+          data:{postID: form.post_id.value, UserID: form.UserID.value},
+          success: function(response){
+              //alert(response)
+          }
+      });
+      return false
+  }
+</script>
+</body>
+</html>
+=======
     <body>
         <div class="navigation">
             <input type="checkbox" class="navigation__checkbox" id="navi-toggle">
@@ -143,3 +191,4 @@
         </footer>
     </body>
 </html>
+>>>>>>> 08918f9fd58455548f38d2201196694098fb958a

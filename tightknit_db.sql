@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+select * from accounts.UserID
+=======
 create database tightknit;
 
 use tightknit;
@@ -53,3 +56,4 @@ create table comments (
 
 insert into accounts (UserID, AdministratorFlag, FirstName, LastName, Bio, Email, Passwd, NumVotes)
 values (1, false, 'miles', 'foret', 'i like this site', 'mforet@uncc.edu', 'password', 0 );
+>>>>>>> 08918f9fd58455548f38d2201196694098fb958a
