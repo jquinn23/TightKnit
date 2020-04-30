@@ -19,6 +19,7 @@ User.prototype = {
             callback(result);
         });
     },
+    
     findPostID : function(user = null, callback)
     {
 
@@ -31,8 +32,21 @@ User.prototype = {
             callback(result);
         });
     },
-    getPosts: (callback)=>{
-        pool.query('SELECT *FROM posts', function(err, result) {
+
+    getPosts: (id = null,callback)=>{
+        sql ='select*from groupp inner join (accounts cross join posts) on (groupp.GroupID = accounts.GroupID and posts.UserID = accounts.UserID) where groupp.GroupID = ? '
+        pool.query(sql,id, function(err, result) {
+            if(err) console.log("Error")
+            callback(result);
+        });
+    },
+
+    getComments: (postID, callback)=>{
+        if(postID) {
+            var field = 'PostID';
+        }
+        let sql = `SELECT * FROM comments WHERE ${field}  = ?`;
+        pool.query(sql,postID, function(err, result) {
             if(err) console.log("Error")
             callback(result);
         });
