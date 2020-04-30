@@ -423,9 +423,10 @@ router.get('/deletepost/:eventID', (req, res) => {
         data = [req.params.eventID, req.session.user.UserID];
         con.query(sql, data, (err, result) => {
             if (err) console.log(err);
-            console.log(result);     
+            console.log(result);
+            res.redirect("/grouppost/1");
         });
-    }); 
+    });
 });
 
 
