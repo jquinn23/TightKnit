@@ -3,19 +3,20 @@ const session = require('express-session');
 const path = require('path');
 const pageRouter = require('./routes/pages');
 const app = express();
+const bodyParser = require("body-parser")
 const cookieParser = require('cookie-parser');
 const flash = require('req-flash');
 
 app.use(express.urlencoded({extended: false}));
-
+app.use(bodyParser.json())
 // Serve Static Files
 //run css
+console.log(path.join(__dirname, 'public'))
 const homePath =path.join(__dirname, 'public')
 app.use(express.static(homePath))
 //Templeate Engine
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
+app.set('view engine','ejs');
 //cookies
 app.use(cookieParser());
 

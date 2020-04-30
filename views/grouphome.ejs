@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link type="text/css" rel="stylesheet" href="/css/postandComment.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>  
+    </head> 
+
+    <!--<body class="allbox">
+        <div class="createpost">
+            <div class="blue-square">
+                <div class="top">
+                </div>
+                <form method="POST"  name="addcommnet" onsubmit="return doPost(this);">
+                    <textarea class="text" name="content">
+                    </textarea>
+                    <button type='submit' id="addComment" name="Post">Post</button>
+                </form>
+            </div> 
+        </div>-->
+        <div class="centerdisplay" id="container">
+        <%posts.forEach(function(post){%>
+            <div class="display">
+                <div class="displaytop">
+                    <div class="image_name">
+                     <img src="/image/default.png" alt="picture">
+                    </div>
+                    <div class="name">
+                        <a><%= post.FullName %></a><br>
+                    <!--<a><%= post.TimeOffPost %></a>-->  
+                    </div>   
+                </div>
+                <div class="display-post">
+                    <p class="p"><%= post.PostContent %></p>
+                </div>
+                <div class="icon-comment">
+                    <a>Comment</a>
+                    <a>Like</a>
+                    <a></a>
+                </div>
+                <div class="comment-line">
+                    <form method="POST" onsubmit="return doComment(this);">
+                        <input type='hidden' name="post_id" value="<%= post.PostID %>"/>
+                        <input type='hidden' name="UserID" value="<%= post.UserID %>"/>
+                       <div class="form-group">
+                        <textarea class="line" name='comment' row="3"></textarea>
+                       </div>
+                       <button type='submit' class="btn btn-primary">Submit</button>
+                   </form>
+                </div>
+            </div>     
+       <% }) %>
+        <script>
+            function doComment(form){
+                $.ajax({
+                    url:'/do-comment',
+                    method:"POST",
+                    data:{comment: form.comment.value, postID: form.post_id.value, UserID: form.UserID.value},
+                    success: function(response){
+                        //alert(response)
+                    }
+                });
+                return false
+            }
+        </script>
+    </body>
+    <!--<script src="/js/post.js" ></script>-->
+</html>

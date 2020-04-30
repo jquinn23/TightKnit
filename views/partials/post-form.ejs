@@ -12,7 +12,6 @@
     <hr>
     <div class="tab-pane" id="addPost">
         <form action="/submitpost" method="POST" class="form-horizontal" id="addPost" role="form"> 
-            
             <div class="form-group">
                 <label for="email" class="col-sm-2 control-label">Comment</label>
                 <div class="col-sm-10">
@@ -29,6 +28,18 @@
     </div>
   </div>
 </div>
-
+<script>
+    function doPost(form){
+        $.ajax({
+            url:"/do-posts",
+            method: "POST",
+            data:{content: form.content.value},
+            success: function(response){
+                alert(response);
+            }
+        });
+        return false
+    }
+</script>
 </body>
 </html>
