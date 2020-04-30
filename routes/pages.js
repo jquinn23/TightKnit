@@ -424,7 +424,7 @@ router.get('/deletepost/:eventID', (req, res) => {
         con.query(sql, data, (err, result) => {
             if (err) console.log(err);
             console.log(result);
-            res.redirect("/grouppost/1");
+            res.redirect("/GroupPost/"+req.session.user.GroupID);
         });
     });
 });
