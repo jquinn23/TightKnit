@@ -1,45 +1,145 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  
-<!-- Header Container -->
-<%- include ('header') -%>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-<body>
- 
+        <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">
 
-<div class="container">
-    <h2 class='text-center'> Create a Post </h2>
-    <hr>
-    <div class="tab-pane" id="addPost">
-        <form action="/submitpost" method="POST" class="form-horizontal" id="addPost" role="form"> 
-            <div class="form-group">
-                <label for="email" class="col-sm-2 control-label">Comment</label>
-                <div class="col-sm-10">
-                  <textarea class="form-control" name="addComment" id="addPost" rows="5"></textarea>
+        <link rel="stylesheet" href="/css/icon-font.css">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="shortcut icon" type="image/png" href="/image/favicon.png">
+        
+        <title>Tightknit |MEET with people of similar interests! |CONNECT with a small community! </title>
+    </head>
+    
+    <body>
+        <div class="navigation">
+            <input type="checkbox" class="navigation__checkbox" id="navi-toggle">
+
+            <label for="navi-toggle" class="navigation__button">
+                <span class="navigation__icon">&nbsp;</span>
+            </label>
+
+            <div class="navigation__background">&nbsp;</div>
+
+            <nav class="navigation__nav">
+                <ul class="navigation__list">
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>01</span>About Natous</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>02</span>Your benfits</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>03</span>Popular tours</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>04</span>Stories</a></li>
+                    <li class="navigation__item"><a href="#" class="navigation__link"><span>05</span>Book now</a></li>
+                    </ul>
+            </nav>
+        </div>
+
+        <header class="header">
+            <div class="header__logo-box">
+                <img src="/image/logo-white.png" alt="Logo" class="header__logo">
+            </div>
+
+            <div class="header__text-box">
+                <h1 class="heading-primary">
+                    <span class="heading-primary--main">Tight-Knit!</span>
+                    <span class="heading-primary--sub">MEET And CONNECT</span>
+                </h1>
+
+                <a href="#section-book" class="btn btn--white btn--animated">Create Post</a>
+            </div>
+        </header>
+
+        <main>
+            <section class="section-stories">
+                <div class="bg-video">
+                    <video class="bg-video__content" autoplay muted loop>
+                        <source src="/image/video.mp4" type="video/mp4">
+                        <source src="/image/video.webm" type="video/webm">
+                        Your browser is not supported!
+                    </video>
+                </div>
+                <div class="u-center-text u-margin-bottom-big">
+                    <h2 class="heading-secondary">
+                        Group <%= posts[0].GroupID %>
+                    </h2>
+                </div>
+                <% if(posts[0].PostID) {%>
+                <% posts.forEach((post)=>{ %>
+                <div class="row">
+                    <div class="story">
+                        <figure class="story__shape">
+                            <img src="/image/nat-8.jpg" alt="Person on a tour" class="story__img">
+                            <figcaption class="story__caption"><%=post.FullName %></figcaption>
+                        </figure>
+                        <div class="story__text">
+                            <h3 class="heading-tertiary u-margin-bottom-small"><%=post.TimeOffPost %></h3>
+                            <p>
+                                <%= post.PostContent %>
+                            </p>
+                            <div>
+                                <a href="/comment/<%=post.PostID%>" class="btn-text">Read all stories &rarr;</a>
+                            </div>
+                            <div>
+                                <%if (post.UserID == user.UserID || user.AdministratorFlag != null) { %>
+                                    <a href="/deletepost/<%=post.PostID%>" class="btn-text">Delete &rarr;</a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            <%} %>
+            </section>
+
+            <section class="section-book" id='section-book'>
+                <div class="row">
+                    <div class="book">
+                        <div class="book__form">
+                            <form action="/submitpost" class="form" method="POST">
+                                <div class="u-margin-bottom-medium">
+                                    <h2 class="heading-secondary">
+                                        Create Post
+                                    </h2>
+                                </div>
+
+                                <div class="form__group">
+                                    <h3>Comment</h3>
+                                    <textarea class="form__input" id="name" name="addComment" rows='5' required></textarea>
+
+                                </div>
+                                <div class="form__group">
+                                    <button class="btn btn--green">Submit &rarr;</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="footer__logo-box">
+                <img src="" alt="Full logo" class="footer__logo">
+            </div>
+            <div class="row">
+                <div class="col-1-of-2">
+                    <div class="footer__navigation">
+                        <ul class="footer__list">
+                            <li class="footer__item"><a href="#" class="footer__link">Company</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Contact us</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Carrers</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Privacy policy</a></li>
+                            <li class="footer__item"><a href="#" class="footer__link">Terms</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-1-of-2">
+                    <p class="footer__copyright">
+                        <a href="#" class="footer__link"></a>  <a href="#" class="footer__link"></a>
+                    </p>
                 </div>
             </div>
-        
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">                    
-                    <button class="btn btn-success btn-circle text-uppercase" type="submit" id="submitPost">Create Post</button>
-                </div>
-            </div>            
-        </form>
-    </div>
-  </div>
-</div>
-<script>
-    function doPost(form){
-        $.ajax({
-            url:"/do-posts",
-            method: "POST",
-            data:{content: form.content.value},
-            success: function(response){
-                alert(response);
-            }
-        });
-        return false
-    }
-</script>
-</body>
+        </footer>
+    </body>
 </html>
