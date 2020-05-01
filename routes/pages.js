@@ -108,9 +108,6 @@ router.post('/submitpost',(req,res)=>{
 
     console.log("end submit Post")
 })
-router.get("/group",(req,res)=>{
-    res.send("You dont have on that group")
-})
 //*****************************************************End Nguyen section ************/
 
 // Index Page
@@ -142,8 +139,10 @@ router.post('/login', (req, res, next)=> {
            // console.log("result",result)
             req.session.user = result;
             req.session.opp = 1;
-
-            if(req.session.user.GroupID == null)
+            if(req.session.user.AdministratorFlag != null){
+                res.redirect('/adminpage')
+            }
+            else if(req.session.user.GroupID == null)
             {
                 res.redirect('/regroup');
             }
@@ -348,19 +347,22 @@ router.get("/profile", (req, res) => {
     console.log('profile')
     con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
         if(err) throw err;
-        res.render('profile', {firstName : result[0].FirstName, lastName : result[0].LastName,
-         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture, boo:true} );
+        res.render('profile', {r : result, boo:true} );
     })
     })
 
 //other profile
-router.get("/otherprofile", (req, res) => {
-
-    con.query(`select * from accounts where UserID=2`, (err,result) => {
-        if(err) throw err;
-        res.render('profile.ejs', {firstName : result[0].FirstName, lastName : result[0].LastName,
-         email : result[0].Email, bio : result[0].Bio, pfp : result[0].ProfilePicture, boo: false} );
-    })
+router.get("/user/:userID", (req, res) => {
+    if(req.session && req.session.user){
+        con.query(`select * from accounts where UserID=${req.params.userID}`, (err,result) => {
+            if(err) throw err;
+            console.log(result[0])
+            res.render('profile', {r : result, boo:false} );
+        })
+    }else
+    {
+        res.redirect('/');
+    }
 })
 
 
@@ -387,7 +389,6 @@ router.post("/updateprofile", (req, res) => {
     })
 })
 
-
 //settings
 router.get("/settings", (req, res) => {
         res.render('settings')
@@ -397,7 +398,9 @@ router.get("/settings", (req, res) => {
 router.get("/deletedaccount", (req, res) => {
     con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
         if(err) throw err;
-        res.render('index');
+        req.session.destroy(function(){
+            res.redirect('/');
+        });
     })
 })
 
@@ -429,14 +432,6 @@ router.get('/deletepost/:eventID', (req, res) => {
     });
 });
 
-
-
-//admin page
-router.get("/adminpage", (req, res) => {
-    res.render('adminpage')
-    })
-
-
 //stuff for profile pictures
 const multer = require('multer')
 router.use(express.static('./public'))
@@ -467,5 +462,55 @@ router.post("/newpfp", (req, res) => {
     })
     })
     })
+
+    router.get('/admingroup/:groupID',(req,res)=>{
+        if(req.session && req.session.user){ 
+            sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${req.params.groupID} and UserID <> ${req.session.user.UserID}`;
+                con.query(sql, (err, result2)=>{
+                console.log(`users in the group(admin):${result2}`)
+                res.render('group', {users: result2, numMembers: result2.length})
+                    
+                })
+                        
+        }else{
+            res.redirect('/');
+        }
+    })
+    
+    router.get('/group',(req,res)=>{
+        if(req.session && req.session.user){
+            sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
+            con.query(sql, (err, result)=>{
+                if(err) throw err;
+                console.log(result)
+        
+                sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${result[0].GroupID} and UserID <> ${req.session.user.UserID}`;
+                con.query(sql, (err, result2)=>{
+                console.log(result2)
+                res.render('group', {users : result2, numMembers : result2.length})
+        
+                })
+            
+                })}else{
+                    res.redirect('/');
+                }
+    })
+    
+    
+    router.get("/adminpage", (req, res) => {
+        if(req.session && req.session.user){
+                sql = `select distinct GroupID, GroupCategory from Groupp where GroupID is not null`;
+                con.query(sql, (err, result)=>{
+                console.log(result)
+                res.render('adminpage', {group: result})
+                })
+        }else
+        {
+            res.redirect('/');
+        }
+        })
+
+
+
 
 module.exports = router;

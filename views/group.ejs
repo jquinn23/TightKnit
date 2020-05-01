@@ -29,7 +29,7 @@
           <div style="padding-top: 30px;">
 
       <%for (var i=0; i < numMembers; i++ ) {%>
-        <a href='otherprofile'><img style="padding-bottom: 10px;" src="<%= users[i].ProfilePicture %>" height="120" width="120">
+        <a href='user/<%=users[i].UserID%>'><img style="padding-bottom: 10px;" src="" height="120" width="120">
         <div style="display: inline; padding-left:20px"><%= users[i].FirstName %> <%= users[i].LastName %></div></a>
 
       </br>

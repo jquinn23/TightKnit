@@ -27,19 +27,19 @@
 
       <div style="padding-top: 30px;" class="row">
         <div class="col-md-6 text-center">
-          <img style="padding-bottom: 10px;" src="<%= pfp %>" height="275" width="275"/>
-          <h4><%= firstName %> <%= lastName %></h4>
+          <img style="padding-bottom: 10px;" src="" height="275" width="275"/>
+          <h4><%= r[0].FirstName %> <%= r[0].LastName %></h4>
         </div>
       
         <div style="padding-top: 30px;" class="col-md-6 text-center">
           <h3>First Name:</h3>
-          <p><%= firstName %></p>
+          <p><%= r[0].FirstName %></p>
           <h3>Last Name:</h3>
-          <p><%= lastName %></p>
-          <h3>Email: <%= email %></h3>
-          <p><%= email %></p>
+          <p><%= r[0].LastName %></p>
+          <h3>Email:</h3>
+          <p><%= r[0].Email %></p>
           <h3>Bio:</h3>
-          <p><%= bio %></p>
+          <p><%= r[0].Bio %></p>
           <%if(boo){%>
           <a href="/editprofile" class="btn" style="background-color: rgb(80, 80, 80); color: white;">Edit Profile</a>
           <%}%>
