@@ -352,17 +352,43 @@ router.get("/profile", (req, res) => {
     })
 
 //other profile
+//I know what you're thinking: This looks jenky
+//It is. But it works.
 router.get("/user/:userID", (req, res) => {
+    req.session.ProfileUser = req.params.userID;
+    res.redirect('/userprofile');
+})
+
+router.get("/userprofile", (req, res) => {
     if(req.session && req.session.user){
-        con.query(`select * from accounts where UserID=${req.params.userID}`, (err,result) => {
+        con.query(`SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts where UserID=${req.session.ProfileUser}`, (err,result) => {
             if(err) throw err;
-            console.log(result[0])
+            console.log(result)
             res.render('profile', {r : result, boo:false} );
         })
     }else
     {
         res.redirect('/');
     }
+})
+
+router.get('/group',(req,res)=>{
+    if(req.session && req.session.user){
+        sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
+        con.query(sql, (err, result)=>{
+            if(err) throw err;
+            console.log(result)
+    
+            sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${result[0].GroupID} and UserID <> ${req.session.user.UserID}`;
+            con.query(sql, (err, result2)=>{
+            console.log(result2)
+            res.render('group', {users : result2, numMembers : result2.length})
+    
+            })
+        
+            })}else{
+                res.redirect('/');
+            }
 })
 
 
@@ -477,24 +503,7 @@ router.post("/newpfp", (req, res) => {
         }
     })
     
-    router.get('/group',(req,res)=>{
-        if(req.session && req.session.user){
-            sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
-            con.query(sql, (err, result)=>{
-                if(err) throw err;
-                console.log(result)
-        
-                sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${result[0].GroupID} and UserID <> ${req.session.user.UserID}`;
-                con.query(sql, (err, result2)=>{
-                console.log(result2)
-                res.render('group', {users : result2, numMembers : result2.length})
-        
-                })
-            
-                })}else{
-                    res.redirect('/');
-                }
-    })
+    
     
     
     router.get("/adminpage", (req, res) => {
