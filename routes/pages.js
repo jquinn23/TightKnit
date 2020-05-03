@@ -9,7 +9,6 @@ const user = new User();
 
 //*********************************************Nguyen section**************************************************//
 router.post('/do-comment',(req,res)=>{
-    console.log("in post comment")
     if(req.session &&req.session.user.UserID){
         var UserID = req.session.user.UserID
         var CommentContent = req.body.addComment
@@ -29,64 +28,64 @@ router.post('/do-comment',(req,res)=>{
 
     //req.session.user.UserID
 })
-router.get('/GroupPost/:id',(req,res)=>{
-    console.log("inside GroupPost")
+router.get('/GroupPost',(req,res)=>{
     if(req.session && req.session.user){
-        console.log(req.session.user.GroupID)
-        if(req.session.user.GroupID == req.params.id){
-            user.getPosts(req.params.id,(result)=>{
-                //console.log(result
-                //console.log(dataArray)
+            user.getPosts(req.session.user.GroupID,(result)=>{
                 if(result.length>0)
                 {
-                    console.log("up")
                     result.reverse()
-                    res.render("home-form",{posts:result})
+                    res.render("home-form",{posts:result, user:req.session.user})
                 }
                 else{
-                    let sql = 'select*from groupp inner join accounts on groupp.GroupID = accounts.GroupID where groupp.GroupID = ?'
-                    con.query(sql, req.params.id, function (error, results, fields) {
+                    let sql = 'select * from groupp inner join accounts on groupp.GroupID = accounts.GroupID where groupp.GroupID = ?'
+                    con.query(sql, req.session.user.GroupID, function (error, results, fields) {
                         if (error) throw error;
-                        console.log("donwn")
-                        console.log(results)
                         result.reverse()
-                        res.render("home-form",{posts:results})
+                        res.render("home-form",{posts:results, user:req.session.user})
                 })
             }
                 
             })
-            console.log("out")
-        }
-        else{
-            res.redirect('/group');
-        }
     }else
     {
         res.redirect('/');
     }
-    console.log("End GroupPost")
 })
-// display comment
+
+//Have to eliminate url params or images don't render for unknown reasons
 router.get('/comment/:id',(req,res)=>{
-    let sql = 'select *from posts inner join comments on posts.PostID = comments.PostID where posts.PostID = ?'
-    con.query(sql, req.params.id, function (error, results, fields) {
-         if (error) throw error;
-         if(results.length>0){
-             res.render("partials/comment",{posts:results})
-        }
-        else{
-             let sql = 'select *from posts where PostID=?'
-             con.query(sql, req.params.id, function (error, results, fields) {
-             if (error) throw error;
-             res.render("partials/comment",{posts:results})
-            })
-        }
-       
-    })
+    req.session.commentid=req.params.id
+    res.redirect('/displaycomment');
     
 });
+
+router.get('/displaycomment', (req,res)=>{
+    let sql = 'select * from posts inner join (accounts cross join comments) on (posts.PostID = comments.PostID and accounts.UserID = comments.UserID) where posts.PostID = ?'
+    let postsql = 'select * from posts inner join accounts on posts.UserID = accounts.UserID where posts.PostID = ?'
+    if(req.session.commentid == null)
+    {
+        res.redirect('/group');
+    }
+    //Used to retrieve the profile picture of the original post before the comments. Inefficient but I'm on a deadline
+    con.query(postsql, req.session.commentid, function (error, result, fields){
+        con.query(sql, req.session.commentid, function (error, results, fields) {
+            if (error) throw error;
+            if(results.length>0){
+                res.render("partials/comment",{posts:results, original:result})
+           }
+           else{
+                let sql = 'select *from posts where PostID=?'
+                con.query(sql, req.session.commentid, function (error, results, fields) {
+                if (error) throw error;
+                res.render("partials/comment",{posts:results, original:result})
+               })
+           }
+          
+       })
+    })
+    
+})
 router.post('/submitpost',(req,res)=>{
-    console.log("in submit post")
     if(req.session && req.session.user.UserID){
         var UserID = req.session.user.UserID
         var GroupID = req.session.user.GroupID
@@ -100,13 +99,12 @@ router.post('/submitpost',(req,res)=>{
     
              //SUccess
              
-             res.redirect("/GroupPost/"+GroupID);
+             res.redirect("/GroupPost");
          })
     }else{
         res.redirect("/");
     }
 
-    console.log("end submit Post")
 })
 //*****************************************************End Nguyen section ************/
 
@@ -114,7 +112,6 @@ router.post('/submitpost',(req,res)=>{
 router.get('/', function(req, res){
     let user = req.session.user;
     if (user) {
-        console.log(req.session.user)
         res.redirect('/home');
         return;
     }
@@ -126,7 +123,7 @@ router.get('/home', (req, res, next)=>{
     let user = req.session.user;
 
     if(user){
-        res.render('home', {opp:req.session.op, name:user.fullname});
+        res.redirect(`/GroupPost`)
         return;
     }
     res.redirect('/');
@@ -136,7 +133,6 @@ router.get('/home', (req, res, next)=>{
 router.post('/login', (req, res, next)=> {
     user.login(req.body.username, req.body.password, function(result){
         if(result) {
-           // console.log("result",result)
             req.session.user = result;
             req.session.opp = 1;
             if(req.session.user.AdministratorFlag != null){
@@ -282,7 +278,6 @@ router.post('/regroup', (req, res, next) => {
             })
         }
     else{
-        console.log(`Error: ${req.body.group} is not a valid category`);
         res.redirect('/');
     }
 });
@@ -344,7 +339,7 @@ router.post("/register", (req, res) => {
 
 //profile
 router.get("/profile", (req, res) => {
-    console.log('profile')
+    
     con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
         if(err) throw err;
         res.render('profile', {r : result, boo:true} );
@@ -360,10 +355,14 @@ router.get("/user/:userID", (req, res) => {
 })
 
 router.get("/userprofile", (req, res) => {
+    if(req.session.ProfileUser == null)
+    {
+        res.redirect('/group');
+    }
     if(req.session && req.session.user){
         con.query(`SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts where UserID=${req.session.ProfileUser}`, (err,result) => {
             if(err) throw err;
-            console.log(result)
+            
             res.render('profile', {r : result, boo:false} );
         })
     }else
@@ -377,11 +376,11 @@ router.get('/group',(req,res)=>{
         sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
         con.query(sql, (err, result)=>{
             if(err) throw err;
-            console.log(result)
+            
     
             sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${result[0].GroupID} and UserID <> ${req.session.user.UserID}`;
             con.query(sql, (err, result2)=>{
-            console.log(result2)
+            
             res.render('group', {users : result2, numMembers : result2.length})
     
             })
@@ -443,7 +442,6 @@ router.get('/changegroup', (req, res) => {
 });
 //Delete Post with comments
 router.get('/deletepost/:eventID', (req, res) => {
-    console.log(req.params.eventID); console.log(req.session.user.UserID);
     let sql = 'DELETE FROM comments where PostID = ?';
     let data = [req.params.eventID];
     con.query(sql, data, (err, result) => {
@@ -452,8 +450,7 @@ router.get('/deletepost/:eventID', (req, res) => {
         data = [req.params.eventID, req.session.user.UserID];
         con.query(sql, data, (err, result) => {
             if (err) console.log(err);
-            console.log(result);
-            res.redirect("/GroupPost/"+req.session.user.GroupID);
+            res.redirect("/GroupPost");
         });
     });
 });
@@ -493,7 +490,6 @@ router.post("/newpfp", (req, res) => {
         if(req.session && req.session.user){ 
             sql = `SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts WHERE GroupID = ${req.params.groupID} and UserID <> ${req.session.user.UserID}`;
                 con.query(sql, (err, result2)=>{
-                console.log(`users in the group(admin):${result2}`)
                 res.render('group', {users: result2, numMembers: result2.length})
                     
                 })
@@ -510,7 +506,6 @@ router.post("/newpfp", (req, res) => {
         if(req.session && req.session.user){
                 sql = `select distinct GroupID, GroupCategory from Groupp where GroupID is not null`;
                 con.query(sql, (err, result)=>{
-                console.log(result)
                 res.render('adminpage', {group: result})
                 })
         }else
