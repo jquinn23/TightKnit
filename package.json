@@ -1,7 +1,6 @@
 {
-  "name": "Tight-Knit",
+  "name": "tight-knit",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "dependencies": {
     "bcrypt": "^4.0.1",
@@ -28,5 +27,14 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jquinn23/TightKnit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jquinn23/TightKnit/issues"
+  },
+  "homepage": "https://github.com/jquinn23/TightKnit#readme",
+  "description": ""
 }

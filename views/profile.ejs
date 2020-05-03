@@ -45,6 +45,10 @@
           <p><%= r[0].Bio %></p>
           <%if(boo){%>
           <a href="/editprofile" class="btn" style="background-color: rgb(80, 80, 80); color: white;">Edit Profile</a>
+          <%}else if(voted == false){%>
+          <a href="/voteout/<%=r[0].UserID%>" class="btn" style="background-color: rgb(80, 80, 80); color: white;">Vote Out</a>
+          <%}else if(voted == true){%>
+          <a href="/rescindvote" class="btn" style="background-color: rgb(80, 80, 80); color: white;">Rescind Vote</a>
           <%}%>
         </div>
 
