@@ -270,6 +270,8 @@ router.post('/regroup', (req, res, next) => {
                         con.query(sql, data, (err, result) => {
                             if(err) throw err;
 
+                            req.session.user.GroupID = NewGroupID
+
                             //This means we have successfully been added to the group
                             res.redirect('/home');
                         })
@@ -406,7 +408,7 @@ router.get('/group',(req,res)=>{
 
 
 //edit profile page
-router.get("/editprofile", (req, res) => {
+router.get("/editprofilef", (req, res) => {
     con.query(`select * from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
         if(err) throw err;
         res.render('editprofile', {firstName : result[0].FirstName, lastName : result[0].LastName,
