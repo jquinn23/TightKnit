@@ -37,7 +37,15 @@ User.prototype = {
         sql ='select*from groupp inner join (accounts cross join posts) on (groupp.GroupID = accounts.GroupID and posts.UserID = accounts.UserID) where groupp.GroupID = ? '
         pool.query(sql,id, function(err, result) {
             if(err) console.log("Error")
-            callback(result);
+            if(result)
+            {
+                callback(result);
+            }
+            else
+            {
+                callback([]);
+            }
+            
         });
     },
 
