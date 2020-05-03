@@ -71,6 +71,7 @@ router.get('/displaycomment', (req,res)=>{
         con.query(sql, req.session.commentid, function (error, results, fields) {
             if (error) throw error;
             if(results.length>0){
+                console.log(results);
                 res.render("partials/comment",{posts:results, original:result})
            }
            else{
@@ -438,12 +439,58 @@ router.get("/settings", (req, res) => {
 
 //account deleted
 router.get("/deletedaccount", (req, res) => {
-    con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+
+    if(!req.session.user)
+    {
+        res.redirect('/');
+    }
+
+    //Have to delete all posts and comments by the user first or it'll crash
+    let sql = 'select * from posts where UserID = ?';
+    con.query(sql, req.session.user.UserID, (err, result) =>{
         if(err) throw err;
-        req.session.destroy(function(){
-            res.redirect('/');
-        });
-    })
+        if(result)
+        {
+            //remove comments attatched to posts
+            let sql2 = 'delete from comments where PostID = ?'
+            console.log(result);
+            result.forEach(function(post)
+            {
+                var alsotest = con.query(sql2, post.PostID, (err, results) => {
+                    if(err) throw err;
+                    callback(results);
+                })
+            })
+
+            //now remove the posts themselves
+            let sql3 = 'delete from posts where PostID = ?'
+            result.forEach(function(post)
+            {
+                var test = con.query(sql3, post.PostID, (err, results) => {
+                    if(err) throw err;
+                    callback(results)
+                })
+            })
+
+            
+        }
+
+        //Now delete all comments made by the user
+        let sql4 = 'delete from comments where UserID = ?'
+        con.query(sql4, req.session.user.UserID, (err, result) => {
+                if(err) throw err;
+
+                //Now that the posts and comments are deleted, delete the account
+            con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+                if(err) throw err;
+                req.session.destroy(function(){
+                res.redirect('/');
+            });
+        })
+            
+        
+        })
+    }) 
 })
 
 //Change/Leave Group
