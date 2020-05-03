@@ -47,19 +47,23 @@
                     <br>
                     <div class="container" style="max-width: 60%">
                         <div class="border rounded" style="background-color: #FFFAFA">
-                            <div class="p-2">
-                                <h4><%=post.FullName %></h4>
-                                <p>
-                                    <%= post.PostContent %>
-                                </p>
-                                <div>
-                                    <a href="/comment/<%=post.PostID%>">Comments</a>
+                            <div class="p-2 row">
+                                <div class="col-md-2">
+                                    <img class="rounded-circle" style="max-width: 100%" src="<%=post.ProfilePicture%>">
                                 </div>
-                                <div>
+                                <div class="col-md-10">
+                                    <h4><%=post.FullName %></h4>
+                                    <p>
+                                        <%= post.PostContent %>
+                                    </p>
+                                    <a href="/comment/<%=post.PostID%>">Comments</a>
+                                    <br>
                                     <%if (post.UserID == user.UserID || user.AdministratorFlag == 1) { %>
                                         <a href="/deletepost/<%=post.PostID%>">Delete</a>
                                     <% } %>
                                 </div>
+                                
+                                
                             </div>
                         </div>
                     </div>

@@ -28,19 +28,17 @@ router.post('/do-comment',(req,res)=>{
 
     //req.session.user.UserID
 })
-router.get('/GroupPost/:id',(req,res)=>{
+router.get('/GroupPost',(req,res)=>{
     if(req.session && req.session.user){
-        if(req.session.user.GroupID == req.params.id){
-            user.getPosts(req.params.id,(result)=>{
-
+            user.getPosts(req.session.user.GroupID,(result)=>{
                 if(result.length>0)
                 {
                     result.reverse()
                     res.render("home-form",{posts:result, user:req.session.user})
                 }
                 else{
-                    let sql = 'select*from groupp inner join accounts on groupp.GroupID = accounts.GroupID where groupp.GroupID = ?'
-                    con.query(sql, req.params.id, function (error, results, fields) {
+                    let sql = 'select * from groupp inner join accounts on groupp.GroupID = accounts.GroupID where groupp.GroupID = ?'
+                    con.query(sql, req.session.user.GroupID, function (error, results, fields) {
                         if (error) throw error;
                         result.reverse()
                         res.render("home-form",{posts:results, user:req.session.user})
@@ -48,34 +46,45 @@ router.get('/GroupPost/:id',(req,res)=>{
             }
                 
             })
-        }
-        else{
-            res.redirect('/group');
-        }
     }else
     {
         res.redirect('/');
     }
 })
-// display comment
+
+//Have to eliminate url params or images don't render for unknown reasons
 router.get('/comment/:id',(req,res)=>{
-    let sql = 'select *from posts inner join comments on posts.PostID = comments.PostID where posts.PostID = ?'
-    con.query(sql, req.params.id, function (error, results, fields) {
-         if (error) throw error;
-         if(results.length>0){
-             res.render("partials/comment",{posts:results})
-        }
-        else{
-             let sql = 'select *from posts where PostID=?'
-             con.query(sql, req.params.id, function (error, results, fields) {
-             if (error) throw error;
-             res.render("partials/comment",{posts:results})
-            })
-        }
-       
-    })
+    req.session.commentid=req.params.id
+    res.redirect('/displaycomment');
     
 });
+
+router.get('/displaycomment', (req,res)=>{
+    let sql = 'select * from posts inner join (accounts cross join comments) on (posts.PostID = comments.PostID and accounts.UserID = comments.UserID) where posts.PostID = ?'
+    let postsql = 'select * from posts inner join accounts on posts.UserID = accounts.UserID where posts.PostID = ?'
+    if(req.session.commentid == null)
+    {
+        res.redirect('/group');
+    }
+    //Used to retrieve the profile picture of the original post before the comments. Inefficient but I'm on a deadline
+    con.query(postsql, req.session.commentid, function (error, result, fields){
+        con.query(sql, req.session.commentid, function (error, results, fields) {
+            if (error) throw error;
+            if(results.length>0){
+                res.render("partials/comment",{posts:results, original:result})
+           }
+           else{
+                let sql = 'select *from posts where PostID=?'
+                con.query(sql, req.session.commentid, function (error, results, fields) {
+                if (error) throw error;
+                res.render("partials/comment",{posts:results, original:result})
+               })
+           }
+          
+       })
+    })
+    
+})
 router.post('/submitpost',(req,res)=>{
     if(req.session && req.session.user.UserID){
         var UserID = req.session.user.UserID
@@ -90,7 +99,7 @@ router.post('/submitpost',(req,res)=>{
     
              //SUccess
              
-             res.redirect("/GroupPost/"+GroupID);
+             res.redirect("/GroupPost");
          })
     }else{
         res.redirect("/");
@@ -114,7 +123,7 @@ router.get('/home', (req, res, next)=>{
     let user = req.session.user;
 
     if(user){
-        res.redirect(`/GroupPost/${req.session.user.GroupID}`)
+        res.redirect(`/GroupPost`)
         return;
     }
     res.redirect('/');
@@ -346,6 +355,10 @@ router.get("/user/:userID", (req, res) => {
 })
 
 router.get("/userprofile", (req, res) => {
+    if(req.session.ProfileUser == null)
+    {
+        res.redirect('/group');
+    }
     if(req.session && req.session.user){
         con.query(`SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts where UserID=${req.session.ProfileUser}`, (err,result) => {
             if(err) throw err;
@@ -437,7 +450,7 @@ router.get('/deletepost/:eventID', (req, res) => {
         data = [req.params.eventID, req.session.user.UserID];
         con.query(sql, data, (err, result) => {
             if (err) console.log(err);
-            res.redirect("/GroupPost/"+req.session.user.GroupID);
+            res.redirect("/GroupPost");
         });
     });
 });
