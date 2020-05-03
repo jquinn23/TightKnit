@@ -37,7 +37,7 @@ router.get('/GroupPost',(req,res)=>{
                     res.render("home-form",{posts:result, user:req.session.user})
                 }
                 else{
-                    let sql = 'select * from groupp inner join accounts on groupp.GroupID = accounts.GroupID where groupp.GroupID = ?'
+                    let sql = 'select * from Groupp inner join accounts on Groupp.GroupID = accounts.GroupID where Groupp.GroupID = ?'
                     con.query(sql, req.session.user.GroupID, function (error, results, fields) {
                         if (error) throw error;
                         result.reverse()
@@ -511,7 +511,7 @@ router.get("/deletedaccount", (req, res) => {
                         //Now that the posts and comments are deleted, delete the account
                         con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
                             if(err) throw err;
-                            con.query(`UPDATE groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = ${req.session.user.GroupID}`, (err, result) => {
+                            con.query(`UPDATE Groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = ${req.session.user.GroupID}`, (err, result) => {
                                 req.session.destroy(function(){
                                 res.redirect('/');
                             })
@@ -530,7 +530,7 @@ router.get("/deletedaccount", (req, res) => {
 //Change/Leave Group
 router.get('/changegroup', (req, res) => {
     let id = req.session.user.UserID;
-    con.query('UPDATE groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = (SELECT GroupID FROM accounts WHERE UserID = ?)', id, (err, result) => {
+    con.query('UPDATE Groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = (SELECT GroupID FROM accounts WHERE UserID = ?)', id, (err, result) => {
         if (err) throw err;
         con.query('UPDATE accounts set GroupID = Null WHERE UserID = ?', id, (err, result) => {
             if (err) throw err;
@@ -685,7 +685,7 @@ router.get("/voteout/:userid", (req, res) => {
                                     console.log("this person has enough votes to get kicked out")
                                     
                                     //decrements the number of users in the group
-                                    con.query(`UPDATE groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = ${group}`, (err, result) => {
+                                    con.query(`UPDATE Groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = ${group}`, (err, result) => {
 
                                         //sets the victim's groupid to null
                                         con.query(`UPDATE accounts set GroupID = Null WHERE UserID = ${victim}`, (err, result) => {
