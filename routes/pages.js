@@ -36,14 +36,14 @@ router.get('/GroupPost/:id',(req,res)=>{
                 if(result.length>0)
                 {
                     result.reverse()
-                    res.render("home-form",{posts:result})
+                    res.render("home-form",{posts:result, user:req.session.user})
                 }
                 else{
                     let sql = 'select*from groupp inner join accounts on groupp.GroupID = accounts.GroupID where groupp.GroupID = ?'
                     con.query(sql, req.params.id, function (error, results, fields) {
                         if (error) throw error;
                         result.reverse()
-                        res.render("home-form",{posts:results})
+                        res.render("home-form",{posts:results, user:req.session.user})
                 })
             }
                 
@@ -114,7 +114,7 @@ router.get('/home', (req, res, next)=>{
     let user = req.session.user;
 
     if(user){
-        res.render('home', {opp:req.session.op, name:user.fullname});
+        res.redirect(`/GroupPost/${req.session.user.GroupID}`)
         return;
     }
     res.redirect('/');
