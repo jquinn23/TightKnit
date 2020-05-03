@@ -270,6 +270,8 @@ router.post('/regroup', (req, res, next) => {
                         con.query(sql, data, (err, result) => {
                             if(err) throw err;
 
+                            req.session.user.GroupID = NewGroupID
+
                             //This means we have successfully been added to the group
                             res.redirect('/home');
                         })
