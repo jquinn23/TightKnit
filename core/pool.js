@@ -6,10 +6,10 @@ const mysql = require('mysql');
 
 const pool = mysql.createPool({
     connectionLimit: 10,
-    host: 'un0jueuv2mam78uv.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
-    user: 'hspibp6wdwj9sale',
-    password: 'qer5yh81qbxlyfvn',
-    database: 'fn0qvg5rc0ngplb0'
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'tightknit'
 });
 
 // Error Catch Connection To DATABASE
