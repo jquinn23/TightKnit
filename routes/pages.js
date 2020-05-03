@@ -242,6 +242,7 @@ router.post('/regroup', (req, res, next) => {
                             {
                                 if(err) throw err;
 
+                                req.session.user.GroupID = new_group_id
                                 //Send them to their new group
                                 res.redirect('/home');
                             })
