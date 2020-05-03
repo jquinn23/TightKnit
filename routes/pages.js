@@ -479,14 +479,48 @@ router.get("/deletedaccount", (req, res) => {
         let sql4 = 'delete from comments where UserID = ?'
         con.query(sql4, req.session.user.UserID, (err, result) => {
                 if(err) throw err;
+            
+            //retrieves all the users the user has voted for
+            con.query(`select VictimID from votes where VoterID= ?`,req.session.user.UserID, (err, votedusers) => {
 
-                //Now that the posts and comments are deleted, delete the account
-            con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
-                if(err) throw err;
-                req.session.destroy(function(){
-                res.redirect('/');
+                //if the sql statement equals undefined then the user did not vote for anyone
+                if(votedusers != undefined){
+                    //creates array for all the people the user voted for
+                    var votedusersarr = []
+
+                    //for loop to add all the voted users to the array
+                    for(var i=0; i<votedusers.length; i++){
+                        votedusersarr.push(votedusers[i].VictimID)
+                    }
+                    
+                //else statement so the sql doesnt give error for undefined array(the array would be empty if they didnt vote for anyone)
+                }else{
+                    votedusersarr.push(-1)
+                }
+
+                //converts the array to a string and removes the brackets
+                var array = votedusersarr.toString().replace('[','').replace(']','')
+                
+
+                //deletes all of the votes for and from the user
+                con.query(`delete from votes where VictimID=${req.session.user.UserID} or VoterID=${req.session.user.UserID}`, (err, result) => {
+                    
+                    //decrements the votes for all users that the user has voter for
+                    con.query(`update accounts set NumVotes=NumVotes-1 where UserID IN (${array})`, (err, result) => {
+
+                        //Now that the posts and comments are deleted, delete the account
+                        con.query(`delete from accounts where UserID=${req.session.user.UserID}`, (err,result) => {
+                            if(err) throw err;
+                            con.query(`UPDATE groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = ${req.session.user.GroupID}`, (err, result) => {
+                                req.session.destroy(function(){
+                                res.redirect('/');
+                            })
             });
         })
+                         
+                    })                                         
+                })
+            })
             
         
         })
@@ -500,10 +534,48 @@ router.get('/changegroup', (req, res) => {
         if (err) throw err;
         con.query('UPDATE accounts set GroupID = Null WHERE UserID = ?', id, (err, result) => {
             if (err) throw err;
+
+
+
+
+            //retrieves all the users the user has voted for
+            con.query(`select VictimID from votes where VoterID= ?`,req.session.user.UserID, (err, votedusers) => {
+
+                //if the sql statement equals undefined then the user did not vote for anyone
+                if(votedusers != undefined){
+                    //creates array for all the people the user voted for
+                    var votedusersarr = []
+
+                    //for loop to add all the voted users to the array
+                    for(var i=0; i<votedusers.length; i++){
+                        votedusersarr.push(votedusers[i].VictimID)
+                    }
+                    
+                    //else statement so the sql doesnt give error for undefined array(the array would be empty if they didnt vote for anyone)
+                    }else{
+                        votedusersarr.push(-1)
+                    }
+
+                    //converts the array to a string and removes the brackets
+                    var array = votedusersarr.toString().replace('[','').replace(']','')
+                
+
+                    //deletes all of the votes for and from the user
+                    con.query(`delete from votes where VictimID=${req.session.user.UserID} or VoterID=${req.session.user.UserID}`, (err, result) => {
+                    
+                        //decrements the votes for all users that the user has voter for
+                        con.query(`update accounts set NumVotes=NumVotes-1 where UserID IN (${array})`, (err, result) => {
+
+                        
+                            });
+                        })
+                         
+                    })                                         
+                })
+            })
             res.redirect("/regroup");          
         });
-    });
-});
+
 //Delete Post with comments
 router.get('/deletepost/:eventID', (req, res) => {
     let sql = 'DELETE FROM comments where PostID = ?';
