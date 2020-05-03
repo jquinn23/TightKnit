@@ -354,6 +354,10 @@ router.get("/user/:userID", (req, res) => {
     res.redirect('/userprofile');
 })
 router.get("/userprofile", (req, res) => {
+    if(req.session.ProfileUser == null)
+    {
+        res.redirect('/group');
+    }
     if(req.session && req.session.user){
         //sql to get info for the other user
         con.query(`SELECT FirstName, LastName, Bio, Email, ProfilePicture, UserID from accounts where UserID=${req.session.ProfileUser}`, (err,result) => {
