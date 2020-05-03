@@ -7,6 +7,48 @@ const hash = require('bcrypt');
 
 const user = new User();
 
+
+//Helper function that deletes the posts of a given user
+function deletePosts(UserID) {
+    //Have to delete all posts and comments by the user first or it'll crash
+    let sql = 'select * from posts where UserID = ?';
+    con.query(sql, UserID, (err, result) =>{
+        if(err) throw err;
+        if(result)
+        {
+            //remove comments attatched to posts
+            let sql2 = 'delete from comments where PostID = ?'
+            
+            result.forEach(function(post)
+            {
+                var alsotest = con.query(sql2, post.PostID, (err, results) => {
+                    if(err) throw err;
+                    return(results);
+                })
+            })
+
+            //now remove the posts themselves
+            let sql3 = 'delete from posts where PostID = ?'
+            result.forEach(function(post)
+            {
+                var test = con.query(sql3, post.PostID, (err, results) => {
+                    if(err) throw err;
+                    return(results)
+                })
+            })    
+        }
+
+        //Now delete all comments made by the user
+        let sql4 = 'delete from comments where UserID = ?'
+        con.query(sql4, UserID, (err, result) => {
+            if(err) throw err;
+        })
+
+        //Callback
+        return(1)
+    })
+}
+
 //*********************************************Nguyen section**************************************************//
 router.post('/do-comment',(req,res)=>{
     if(req.session &&req.session.user.UserID){
@@ -87,7 +129,6 @@ router.get('/displaycomment', (req,res)=>{
         con.query(sql, req.session.commentid, function (error, results, fields) {
             if (error) throw error;
             if(results.length>0){
-                console.log(results);
                 res.render("partials/comment",{posts:results, original:result})
            }
            else{
@@ -483,7 +524,6 @@ router.get("/deletedaccount", (req, res) => {
         {
             //remove comments attatched to posts
             let sql2 = 'delete from comments where PostID = ?'
-            console.log(result);
             result.forEach(function(post)
             {
                 var alsotest = con.query(sql2, post.PostID, (err, results) => {
@@ -566,7 +606,7 @@ router.get('/changegroup', (req, res) => {
             if (err) throw err;
 
 
-
+            var delposts = deletePosts(id);
 
             //retrieves all the users the user has voted for
             con.query(`select VictimID from votes where VoterID= ?`,req.session.user.UserID, (err, votedusers) => {
@@ -714,7 +754,7 @@ router.get("/voteout/:userid", (req, res) => {
                                 if(numvotes[0].NumVotes>= (members[0].NumberOfPeopleInGroup/2)){
                                     //the user has enough votes to get kicked.
                                     console.log("this person has enough votes to get kicked out")
-                                    
+                                    var delTheirPosts = deletePosts(victim);
                                     //decrements the number of users in the group
                                     con.query(`UPDATE Groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = ${group}`, (err, result) => {
 
@@ -796,6 +836,8 @@ router.get("/rescindvote", (req, res) => {
             })
 
 })
+
+
 
 
 
