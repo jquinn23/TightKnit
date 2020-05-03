@@ -55,11 +55,27 @@ router.get('/GroupPost',(req,res)=>{
 //Have to eliminate url params or images don't render for unknown reasons
 router.get('/comment/:id',(req,res)=>{
     req.session.commentid=req.params.id
+
+    let mysqldata = req.session.user.UserID
+    let mysql = `select GroupID from accounts where UserID=?`
+
+    con.query(mysql, mysqldata, (err, groupid) => {
+        req.session.user.GroupID = groupid[0].GroupID
+    })
+
     res.redirect('/displaycomment');
     
-});
+})
 
 router.get('/displaycomment', (req,res)=>{
+    
+    let mysqldata = req.session.user.UserID
+    let mysql = `select GroupID from accounts where UserID=?`
+
+    con.query(mysql, mysqldata, (err, groupid) => {
+        req.session.user.GroupID = groupid[0].GroupID
+    })
+
     let sql = 'select * from posts inner join (accounts cross join comments) on (posts.PostID = comments.PostID and accounts.UserID = comments.UserID) where posts.PostID = ?'
     let postsql = 'select * from posts inner join accounts on posts.UserID = accounts.UserID where posts.PostID = ?'
     if(req.session.commentid == null)
@@ -122,6 +138,13 @@ router.get('/', function(req, res){
 // Get home page
 router.get('/home', (req, res, next)=>{
     let user = req.session.user;
+
+    let mysqldata = req.session.user.UserID
+    let mysql = `select GroupID from accounts where UserID=?`
+
+    con.query(mysql, mysqldata, (err, groupid) => {
+        req.session.user.GroupID = groupid[0].GroupID
+    })
 
     if(user){
         res.redirect(`/GroupPost`)
@@ -391,6 +414,13 @@ router.get("/userprofile", (req, res) => {
 
 router.get('/group',(req,res)=>{
     if(req.session && req.session.user){
+        let mysqldata = req.session.user.UserID
+        let mysql = `select GroupID from accounts where UserID=?`
+
+        con.query(mysql, mysqldata, (err, groupid) => {
+        req.session.user.GroupID = groupid[0].GroupID
+        })
+
         sql = `SELECT GroupID from accounts WHERE UserID = ${req.session.user.UserID}`;
         con.query(sql, (err, result)=>{
             if(err) throw err;
@@ -573,6 +603,7 @@ router.get('/changegroup', (req, res) => {
                     })                                         
                 })
             })
+            req.session.user.GroupID = null
             res.redirect("/regroup");          
         });
 
