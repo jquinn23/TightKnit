@@ -353,17 +353,31 @@ router.get("/user/:userID", (req, res) => {
     req.session.ProfileUser = req.params.userID;
     res.redirect('/userprofile');
 })
-
 router.get("/userprofile", (req, res) => {
     if(req.session.ProfileUser == null)
     {
         res.redirect('/group');
     }
     if(req.session && req.session.user){
-        con.query(`SELECT FirstName, LastName, Bio, ProfilePicture, UserID from accounts where UserID=${req.session.ProfileUser}`, (err,result) => {
-            if(err) throw err;
-            
-            res.render('profile', {r : result, boo:false} );
+        //sql to get info for the other user
+        con.query(`SELECT FirstName, LastName, Bio, Email, ProfilePicture, UserID from accounts where UserID=${req.session.ProfileUser}`, (err,result) => {
+
+            //variables to check if they have voted
+            var voter = req.session.user.UserID
+            var victim = req.session.ProfileUser
+
+            //sql to check whether the current user has voted for the other user
+            con.query(`SELECT VoterID, VictimID FROM votes where VoterID = ${voter} && VictimID = ${victim}`, (err, sqlresult)=>{
+                
+                //if there is no result, then the current user has not voted for them and voted is set to false when loading profile
+                if(sqlresult[0] === undefined){
+                    res.render('profile', {r : result, boo:false, voted : false})
+                    
+                //else means that there was a result from sql, which means the current user has voted for them and voted is set to true
+                }else{
+                    res.render('profile', {r : result, boo:false, voted : true} )
+                }
+            })
         })
     }else
     {
@@ -513,6 +527,122 @@ router.post("/newpfp", (req, res) => {
             res.redirect('/');
         }
         })
+
+//voteout route
+//i am sure there is a much better and more efficient way, but we are low on time
+router.get("/voteout/:userid", (req, res) => {
+
+    if(req.session && req.session.user){
+    
+        //creates variables for the victimid, voterid, and groupid
+        var victim = req.params.userid
+        var voter = req.session.user.UserID
+        var group = req.session.user.GroupID
+    
+        data = [victim, voter, group]
+
+                //insert the vote into the votes table
+                sql = `INSERT INTO votes (VictimID, VoterID, GroupID) VALUES (?, ?, ?);`;
+                con.query(sql, data, (err, result)=>{
+                    
+                    //increment the number of votes 
+                    sql = `UPDATE accounts SET NumVotes = NumVotes + 1 WHERE UserID = ${victim}`
+                    con.query(sql, (err, result2)=>{
+
+                        //get the number of votes
+                        sql = `select NumVotes from accounts where UserID=${victim}`
+                        con.query(sql, (err, numvotes)=>{
+
+                            //get the number of members in the group
+                            sql = `SELECT NumberOfPeopleInGroup FROM Groupp where GroupID=${group};`
+                            con.query(sql, (err, members)=>{
+
+                                //if statement that checks if a person has enough votes to be removed from the group
+                                if(numvotes[0].NumVotes>= (members[0].NumberOfPeopleInGroup/2)){
+                                    //the user has enough votes to get kicked.
+                                    console.log("this person has enough votes to get kicked out")
+                                    
+                                    //decrements the number of users in the group
+                                    con.query(`UPDATE groupp set NumberOfPeopleInGroup = NumberOfPeopleInGroup - 1 where GroupID = ${group}`, (err, result) => {
+
+                                        //sets the victim's groupid to null
+                                        con.query(`UPDATE accounts set GroupID = Null WHERE UserID = ${victim}`, (err, result) => {
+
+                                            //sets the user's votes back to 0
+                                            con.query(`UPDATE accounts set NumVotes = 0 WHERE UserID = ${victim}`, (err, result) => {
+
+                                                //retrieves all the users the victim has voted for
+                                                con.query(`select VictimID from votes where VoterID=${victim}`, (err, votedusers) => {
+
+                                                    //if the sql statement equals undefined then the user did not vote for anyone
+                                                    if(votedusers != undefined){
+                                                        //creates array for all the people the user voted for
+                                                        var votedusersarr = []
+
+                                                        //for loop to add all the voted users to the array
+                                                        for(var i=0; i<votedusers.length; i++){
+                                                            votedusersarr.push(votedusers[i].VictimID)
+                                                        }
+                                                        
+                                                    //else statement so the sql doesnt give error for undefined array(the array would be empty if they didnt vote for anyone)
+                                                    }else{
+                                                        votedusersarr.push(-1)
+                                                    }
+
+                                                    //converts the array to a string and removes the brackets
+                                                    var array = votedusersarr.toString().replace('[','').replace(']','')
+                                                    
+
+                                                    //deletes all of the votes for and from the victim
+                                                    con.query(`delete from votes where VictimID=${victim} or VoterID=${victim}`, (err, result) => {
+                                                        
+                                                        //decrements the votes for all users that the victim has voter for
+                                                        con.query(`update accounts set NumVotes=NumVotes-1 where UserID IN (${array})`, (err, result) => {
+                                                             
+                                                        })                                         
+                                                    })
+                                                })
+                                            })
+
+                                        })
+                                    })
+
+                                }
+                                res.redirect('/group')
+                            })
+
+                        })
+
+                    })
+            })
+
+    }else{
+    res.redirect('/');
+    }
+})
+
+//unvote for someone
+router.get("/rescindvote", (req, res) => {
+
+    //saves victimid, voterid and groupid
+    var victim = req.session.ProfileUser
+    var voter = req.session.user.UserID
+    var group = req.session.user.GroupID
+    data = [victim, voter, group]
+
+    //deletes vote from the votes table
+    sql = `delete FROM votes where VictimId=${victim} and VoterID=${voter} and GroupID=${group}`;
+    con.query(sql, data, (err, result)=>{
+    
+        //decrements the vote for the user in the accounts table
+        sql = `UPDATE accounts SET NumVotes = NumVotes - 1 WHERE UserID = ${victim}`
+            con.query(sql, (err, result2)=>{
+                res.redirect('/userprofile')
+
+                })
+            })
+
+})
 
 
 
